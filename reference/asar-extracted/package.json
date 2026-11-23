@@ -1,0 +1,8 @@
+{
+  "name": "Manager",
+  "version": "26.11.11",
+  "description": "Free Accounting Software",
+  "author": "Lubos Hasko",
+  "main": "main.js",
+  "private": true
+}

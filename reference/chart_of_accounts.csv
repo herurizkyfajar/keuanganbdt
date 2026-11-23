@@ -1,0 +1,45 @@
+code,name,type,parent_id,description
+100,Aset,asset,,Kelompok aset
+110,Kas,asset,100,Uang tunai di kantor
+120,Bank BCA,bank,100,Rekening bank BCA
+130,Piutang Usaha,asset,100,Piutang dari pelanggan
+140,Persediaan,asset,100,Barang siap jual
+121,Bank BRI,bank,100,Rekening bank BRI
+200,Kewajiban,liability,,Kelompok kewajiban
+210,Utang Dagang,liability,200,Utang kepada pemasok
+220,Utang Lainnya,liability,200,Utang lainnya
+300,Ekuitas,equity,,Kelompok ekuitas
+310,Modal Awal,equity,300,Modal pemilik
+320,Laba Ditahan,equity,300,Laba yang ditahan
+400,Pendapatan,revenue,,Kelompok pendapatan
+410,Penjualan,revenue,400,Penjualan barang dan jasa
+420,Lain-lain Pendapatan,revenue,400,Pendapatan lain
+500,Beban,expense,,Kelompok beban
+510,Beban Listrik,expense,500,Biaya listrik
+511,Beban Internet,expense,500,Biaya internet
+520,Beban Gaji,expense,500,Gaji karyawan
+530,Beban Sewa,expense,500,Sewa kantor
+540,Beban Transportasi,expense,500,Biaya transportasi
+610,Biaya Administrasi Bank,expense,500,Biaya admin bank
+611,Bunga diterima,revenue,400,Bunga penerimaan
+612,Dana Disetor,asset,100,Dana yang disetor
+613,Biaya Percetakan dan Alat Tulis Kantor,expense,500,ATK dan percetakan
+614,Biaya Perbaikan dan Pemeliharaan,expense,500,Biaya perbaikan
+615,Biaya Peralatan Komputer,expense,500,Peralatan komputer
+616,Donasi,expense,500,Biaya donasi
+617,Biaya Sewa Mobil dan Supir,expense,500,Sewa mobil dan supir
+618,Beban Kendaraan,expense,500,Biaya kendaraan
+619,Biaya Jasa Notaris,expense,500,Biaya notaris
+620,Biaya Hiburan,expense,500,Biaya hiburan
+621,"Biaya Iklan, Promosi, ADS, AI, BACKUP WEB",expense,500,Iklan dan promosi
+622,Biaya Jasa Akuntansi,expense,500,Biaya akuntansi
+623,Pendapetan Pengelolaan Web,revenue,400,Pendapatan web
+624,Biaya Perpanjangan n8n,expense,500,Perpanjangan n8n
+625,Biaya Pembelian Aset,asset,100,Pembelian aset
+626,Biaya Perpanjang Domain,expense,500,Perpanjangan domain
+627,Biaya Perpanjang Hosting,expense,500,Perpanjangan hosting
+628,Biaya Gaji,expense,500,Gaji karyawan
+629,Biaya Rapat,expense,500,Biaya rapat
+630,Tax,expense,500,Pajak
+631,Biaya BRC,expense,500,Biaya BRC
+632,FEE BRC,expense,500,Fee BRC

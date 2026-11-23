@@ -1,0 +1,24 @@
+# Environment & konfigurasi sensitif
+.env
+.env.local
+config/database.php
+database.sql
+
+# Logs
+*.log
+error_log
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Composer (jika digunakan di masa depan)
+vendor/
+
+# Server binary (melebihi batas ukuran file GitHub 100 MB)
+server/

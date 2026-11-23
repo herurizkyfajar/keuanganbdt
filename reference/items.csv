@@ -1,0 +1,4 @@
+code,name,type,description,sales_price,purchase_price
+ITEM-001,Laptop ASUS,Laptop untuk karyawan,product,12000000,10000000
+ITEM-002,Konsultasi Pajak,Jasa konsultasi pajak bulanan,service,500000,0
+ITEM-003,Tinta Printer,Tinta original,product,150000,100000
