@@ -39,4 +39,36 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   });
+
+  // =============== Mobile Sidebar Toggle ===============
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const menuToggle = document.getElementById('mobileMenuToggle');
+
+  if (sidebar && backdrop && menuToggle) {
+    function openSidebar() {
+      sidebar.classList.add('show');
+      backdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('show');
+      backdrop.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openSidebar);
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Tutup sidebar saat klik link navigasi (mobile)
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+      link.addEventListener('click', closeSidebar);
+    });
+
+    // Tutup sidebar saat tombol Keluar diklik
+    const logoutLink = document.querySelector('.sidebar-logout');
+    if (logoutLink) {
+      logoutLink.addEventListener('click', closeSidebar);
+    }
+  }
 });

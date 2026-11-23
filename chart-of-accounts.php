@@ -540,8 +540,6 @@ document.getElementById('pageSubtitle').textContent = 'Daftar rekening akuntansi
       </div>
 
     </div>
-  </main>
-</div>
 
 <script>
 function openModal(id){ document.getElementById(id).classList.add('show'); }

@@ -228,6 +228,12 @@ ob_start();
           <?= htmlspecialchars($businessName) ?>
         </span>
       </div>
+
+      <!-- Mobile hamburger menu -->
+      <button class="btn btn-outline btn-sm mobile-menu-toggle" id="mobileMenuToggle" style="display:none;">
+        <i class="bi bi-list"></i> Menu
+      </button>
+
       <?php endif; ?>
 
       <header class="page-header">

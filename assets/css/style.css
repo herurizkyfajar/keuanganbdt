@@ -426,3 +426,10 @@ table.data-table tbody tr:last-child td { border-bottom: none; }
   transition: opacity 0.25s; pointer-events: none;
 }
 .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+
+/* Mobile hamburger toggle button */
+.mobile-menu-toggle { display: none; }
+
+@media (max-width: 991px) {
+  .mobile-menu-toggle { display: inline-flex; }
+}
