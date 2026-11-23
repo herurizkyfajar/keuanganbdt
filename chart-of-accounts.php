@@ -1,26 +1,6 @@
 <?php
 // chart-of-accounts.php
-require_once __DIR__ . '/config/database.php';
-session_start();
-
-// Require login
-$currentFile = basename($_SERVER['PHP_SELF']);
-if ($currentFile !== 'login.php' && $currentFile !== 'logout.php' && empty($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
-if (empty($_SESSION['business_id'])) {
-    $stmt = $pdo->query("SELECT id, name, currency FROM businesses ORDER BY id ASC LIMIT 1");
-    $biz = $stmt->fetch();
-    $_SESSION['business_id'] = $biz ? $biz['id'] : null;
-    $_SESSION['business_name'] = $biz ? $biz['name'] : 'Manajer Akuntansi';
-    $_SESSION['business_currency'] = $biz ? $biz['currency'] : 'IDR';
-}
-$businessId = $_SESSION['business_id'];
-$businessName = $_SESSION['business_name'] ?? 'Manajer Akuntansi';
-$businessCurrency = $_SESSION['business_currency'] ?? 'IDR';
-$userName = $_SESSION['user_name'] ?? 'Pengguna';
-$userRole = $_SESSION['user_role'] ?? 'user';
+require_once 'includes/header.php';
 
 // Handle POST actions BEFORE any HTML output
 $message = '';
@@ -479,156 +459,10 @@ tr.highlight-moved {
   transition: background 1.5s ease;
 }
 </style>
-</head>
-<body>
-<div class="app">
-<?php if ($currentFile !== 'login.php'): ?>
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <span class="brand-icon"><i class="bi bi-building"></i></span>
-      <div class="brand-info">
-        <div class="brand-name"><?= htmlspecialchars($businessName) ?></div>
-        <div class="brand-currency"><?= htmlspecialchars($businessCurrency) ?></div>
-      </div>
-    </div>
-
-    <div class="sidebar-search">
-      <input type="text" placeholder="Cari modul...">
-    </div>
-
-    <nav>
-      <div class="nav-section">UTAMA</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'dashboard.php' ? 'active' : '' ?>" href="dashboard.php">
-            <i class="bi bi-speedometer2"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'chart-of-accounts.php' ? 'active' : '' ?>" href="chart-of-accounts.php">
-            <i class="bi bi-journal-text"></i> Chart of Accounts
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'journal-entries.php' ? 'active' : '' ?>" href="journal-entries.php">
-            <i class="bi bi-currency-exchange"></i> Jurnal Umum
-          </a>
-        </li>
-      </ul>
-
-      <div class="nav-section">TRANSAKSI</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'sales-invoices.php' ? 'active' : '' ?>" href="sales-invoices.php">
-            <i class="bi bi-receipt-cutoff"></i> Faktur Penjualan
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'purchase-invoices.php' ? 'active' : '' ?>" href="purchase-invoices.php">
-            <i class="bi bi-cart-fill"></i> Faktur Pembelian
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'bank-accounts.php' ? 'active' : '' ?>" href="bank-accounts.php">
-            <i class="bi bi-building"></i> Rekening Bank
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'expense-claims.php' ? 'active' : '' ?>" href="expense-claims.php">
-            <i class="bi bi-wallet2"></i> Klaim Biaya
-          </a>
-        </li>
-      </ul>
-
-      <div class="nav-section">MASTER DATA</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'customers.php' ? 'active' : '' ?>" href="customers.php">
-            <i class="bi bi-people"></i> Pelanggan
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'suppliers.php' ? 'active' : '' ?>" href="suppliers.php">
-            <i class="bi bi-person-badge"></i> Pemasok
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'items.php' ? 'active' : '' ?>" href="items.php">
-            <i class="bi bi-box-seam"></i> Barang &amp; Jasa
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'chart-of-accounts.php' ? 'active' : '' ?>" href="chart-of-accounts.php">
-            <i class="bi bi-journal-text"></i> Kelola Data Akun
-          </a>
-        </li>
-      </ul>
-
-      <div class="nav-section">LAPORAN</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'reports.php' ? 'active' : '' ?>" href="reports.php">
-            <i class="bi bi-graph-up"></i> Laporan Keuangan
-          </a>
-        </li>
-      </ul>
-
-      <div class="nav-section">PENGATURAN</div>
-      <ul class="nav-list">
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'settings.php' ? 'active' : '' ?>" href="settings.php">
-            <i class="bi bi-gear"></i> Pengaturan Perusahaan
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'users.php' ? 'active' : '' ?>" href="users.php">
-            <i class="bi bi-people"></i> Kelola Pengguna Admin
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'profile.php' ? 'active' : '' ?>" href="profile.php">
-            <i class="bi bi-person"></i> Kelola Profil Akun
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= $currentFile == 'import.php' ? 'active' : '' ?>" href="import.php">
-            <i class="bi bi-upload"></i> Import Data CSV
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-user-name"><?= htmlspecialchars($userName) ?></div>
-        <div class="sidebar-user-role"><?= htmlspecialchars($userRole) ?></div>
-      </div>
-      <a href="logout.php" class="sidebar-logout"><i class="bi bi-box-arrow-right"></i> Keluar</a>
-      <div style="font-size:0.7rem; color:#999; margin-top:0.5rem;">v2.0 &bull; <?php echo date('Y'); ?></div>
-    </div>
-  </nav>
-
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-<?php endif; ?>
-
-  <main class="main">
-    <div class="main-inner">
-      <?php if ($currentFile !== 'login.php'): ?>
-      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
-        <span style="background:#fff; border:1px solid var(--border); border-radius:2rem; padding:0.35rem 0.9rem; font-size:0.82rem; color:var(--muted); font-weight:600; box-shadow:var(--shadow);">
-          <i class="bi bi-building me-1" style="font-size:0.75rem;"></i>
-          <?= htmlspecialchars($businessName) ?>
-        </span>
-      </div>
-      <?php endif; ?>
-
-      <header class="page-header">
-        <div class="page-title-box">
-          <h1 id="pageTitle">Daftar Akun</h1>
-          <p id="pageSubtitle">Daftar rekening akuntansi perusahaan</p>
-        </div>
-        <div class="page-actions" id="pageActions"></div>
-      </header>
+<script>
+document.getElementById('pageTitle').textContent = 'Daftar Akun';
+document.getElementById('pageSubtitle').textContent = 'Daftar rekening akuntansi perusahaan';
+</script>
 
       <?php echo $message; ?>
       <?php if ($saved): ?><div class="alert alert-success">Akun berhasil ditambahkan.</div><?php endif; ?>
@@ -953,5 +787,4 @@ function editGroup(data) {
   </div>
 </div>
 
-</body>
-</html>
+<?php require_once 'includes/footer.php'; ?>
