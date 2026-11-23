@@ -62,35 +62,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Delete account (soft delete - set is_active = 0)
+// Delete account (always soft delete - set is_active = 0, never hard delete)
+// Data akun tidak pernah dihancurkan permanen, sehingga selalu dapat dikembalikan.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_account') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) {
         $message = '<div class="alert alert-danger">ID akun tidak valid.</div>';
     } else {
-        // Check if account has transaction lines
+        // Check if account has transaction lines (untuk pesan informatif saja)
         $chk = $pdo->prepare("SELECT COUNT(*) as cnt FROM transaction_lines WHERE account_id = ?");
         $chk->execute([$id]);
         $cnt = $chk->fetchColumn();
         
-        if ($cnt > 0) {
-            // Soft delete - set is_active = 0 instead of hard delete
-            try {
-                $stmt = $pdo->prepare("UPDATE accounts SET is_active = 0 WHERE id = ? AND business_id = ?");
-                $stmt->execute([$id, $businessId]);
-                $message = '<div class="alert alert-success">Akun berhasil dinonaktifkan (sudah memiliki transaksi).</div>';
-            } catch (Exception $e) {
-                $message = '<div class="alert alert-danger">Gagal: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        // Selalu soft delete untuk mencegah kehilangan data permanen
+        try {
+            $stmt = $pdo->prepare("UPDATE accounts SET is_active = 0 WHERE id = ? AND business_id = ?");
+            $stmt->execute([$id, $businessId]);
+            if ($cnt > 0) {
+                $message = '<div class="alert alert-success">Akun berhasil dinonaktifkan (sudah memiliki transaksi, tidak dapat dihapus permanen).</div>';
+            } else {
+                $message = '<div class="alert alert-success">Akun berhasil dinonaktifkan (dapat dikembalikan kapan saja).</div>';
             }
-        } else {
-            // Hard delete - no transactions
-            try {
-                $stmt = $pdo->prepare("DELETE FROM accounts WHERE id = ? AND business_id = ?");
-                $stmt->execute([$id, $businessId]);
-                $message = '<div class="alert alert-success">Akun berhasil dihapus.</div>';
-            } catch (Exception $e) {
-                $message = '<div class="alert alert-danger">Gagal: ' . htmlspecialchars($e->getMessage()) . '</div>';
-            }
+        } catch (Exception $e) {
+            $message = '<div class="alert alert-danger">Gagal: ' . htmlspecialchars($e->getMessage()) . '</div>';
         }
         header('Location: chart-of-accounts.php');
         exit;
@@ -225,7 +219,7 @@ if ((int)$maxSort->fetchColumn() === 0) {
 
 // Fetch accounts
 $stmt = $pdo->prepare("
-  SELECT a.id, a.code, a.name, a.type, a.sort_order, a.parent_id, a.description,
+  SELECT a.id, a.code, a.name, a.type, a.sort_order, a.parent_id, a.description, a.is_active,
          COUNT(l.id) as has_lines,
          COALESCE(SUM(
            CASE 

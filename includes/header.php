@@ -1,7 +1,9 @@
 <?php
 // includes/header.php
 require_once __DIR__ . '/../config/database.php';
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 // Require login for all pages except login.php
 $currentFile = basename($_SERVER['PHP_SELF']);
@@ -56,6 +58,7 @@ try {
 $userName = $_SESSION['user_name'] ?? 'Pengguna';
 $userRole = $_SESSION['user_role'] ?? 'user';
 $isLoginPage = ($currentFile === 'login.php');
+ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="id">

@@ -1,5 +1,6 @@
 <?php
 // ai-settings.php — Pengaturan API Asisten AI
+ob_start();
 require_once 'includes/header.php';
 $businessId = $_SESSION['business_id'];
 
