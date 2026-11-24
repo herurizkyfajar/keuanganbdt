@@ -1,6 +1,13 @@
 <?php
 // includes/header.php
 require_once __DIR__ . '/../config/database.php';
+
+// Secure session cookie settings
+$isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+ini_set('session.cookie_secure', $isHttps ? '1' : '0');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Strict');
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }

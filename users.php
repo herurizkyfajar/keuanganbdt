@@ -6,13 +6,22 @@ $businessId = $_SESSION['business_id'];
 
 $message = '';
 
+// Validasi CSRF token untuk semua aksi POST
+$csrfValid = true;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $message = '<div class="alert alert-danger">Permintaan tidak valid. Silakan coba lagi.</div>';
+        $csrfValid = false;
+    }
+}
+
 // Ambil semua pengguna
 $stmt = $pdo->prepare("SELECT id, email, name, role, is_active, created_at FROM users ORDER BY created_at DESC");
 $stmt->execute();
 $users = $stmt->fetchAll();
 
 // Tambah pengguna baru
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_user') {
+if ($csrfValid && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_user') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -43,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Update pengguna
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_user') {
+if ($csrfValid && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_user') {
     $id = (int)($_POST['id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -64,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Hapus pengguna
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
+if ($csrfValid && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id === $userId) {
         $message = '<div class="alert alert-danger">Tidak dapat menghapus akun sendiri.</div>';
@@ -129,6 +138,7 @@ document.getElementById('pageSubtitle').textContent = 'Kelola data akun admin da
               ])) ?>)"><i class="bi bi-pencil"></i></button>
               <?php if ($u['id'] !== $userId): ?>
                 <form method="POST" action="" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
+                  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                   <input type="hidden" name="action" value="delete_user">
                   <input type="hidden" name="id" value="<?= $u['id'] ?>">
                   <button type="submit" class="btn btn-sm btn-outline" style="color:#dc3545;"><i class="bi bi-trash"></i></button>
@@ -147,6 +157,7 @@ document.getElementById('pageSubtitle').textContent = 'Kelola data akun admin da
 <div class="modal-overlay" id="modalAddUser">
   <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
       <input type="hidden" name="action" value="add_user">
       <input type="hidden" id="editUserId" name="id">
       <div class="mdlg-header">

@@ -1,6 +1,13 @@
 <?php
 // login.php - Halaman login standalone (tanpa sidebar/header app)
 require_once __DIR__ . '/config/database.php';
+
+// Secure session cookie settings
+$isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+ini_set('session.cookie_secure', $isHttps ? '1' : '0');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Strict');
+
 session_start();
 
 // If already logged in, redirect to dashboard
@@ -11,37 +18,81 @@ if (!empty($_SESSION['user_id'])) {
 
 $error = '';
 
+// Create failed_logins table for rate limiting (brute-force protection)
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS failed_logins (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_email (email),
+        INDEX idx_ip (ip_address),
+        INDEX idx_attempted (attempted_at)
+    ) ENGINE=InnoDB;
+");
+
+// CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    if (empty($email) || empty($password)) {
-        $error = 'Email dan password harus diisi.';
+    // Validate CSRF token
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $error = 'Permintaan tidak valid. Silakan coba lagi.';
     } else {
-        $stmt = $pdo->prepare("SELECT id, email, password, name, role, is_active FROM users WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-        if ($user && password_verify($password, $user['password'])) {
-            if (!$user['is_active']) {
-                $error = 'Akun Anda tidak aktif. Hubungi administrator.';
-            } else {
-                $_SESSION['user_id'] = (int)$user['id'];
-                $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_role'] = $user['role'];
+        // Rate limiting: maksimal 5 percobaan per 15 menit per email atau IP
+        $window = 15 * 60; // 15 menit
+        $maxAttempts = 5;
 
-                if (empty($_SESSION['business_id'])) {
-                    $biz = $pdo->query("SELECT id FROM businesses ORDER BY id ASC LIMIT 1")->fetch();
-                    $_SESSION['business_id'] = $biz ? (int)$biz['id'] : null;
-                    $_SESSION['business_name'] = $biz ? $biz['name'] : 'Manajer Akuntansi';
-                }
+        $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM failed_logins WHERE (email = ? OR ip_address = ?) AND attempted_at > DATE_SUB(NOW(), INTERVAL ? SECOND)");
+        $stmt->execute([$email, $ip, $window]);
+        $attempts = (int)$stmt->fetchColumn();
 
-                header('Location: dashboard.php');
-                exit;
-            }
+        if ($attempts >= $maxAttempts) {
+            $error = 'Terlalu banyak percobaan login gagal. Silakan coba lagi dalam 15 menit.';
+        } elseif (empty($email) || empty($password)) {
+            $error = 'Email dan password harus diisi.';
         } else {
-            $error = 'Email atau password salah.';
+            $stmt = $pdo->prepare("SELECT id, email, password, name, role, is_active FROM users WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                if (!$user['is_active']) {
+                    $error = 'Akun Anda tidak aktif. Hubungi administrator.';
+                } else {
+                    // Hapus catatan gagal login saat berhasil
+                    $del = $pdo->prepare("DELETE FROM failed_logins WHERE email = ? OR ip_address = ?");
+                    $del->execute([$email, $ip]);
+
+                    // Regenerate session ID untuk mencegah session fixation
+                    session_regenerate_id(true);
+
+                    $_SESSION['user_id'] = (int)$user['id'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['user_role'] = $user['role'];
+
+                    if (empty($_SESSION['business_id'])) {
+                        $biz = $pdo->query("SELECT id FROM businesses ORDER BY id ASC LIMIT 1")->fetch();
+                        $_SESSION['business_id'] = $biz ? (int)$biz['id'] : null;
+                        $_SESSION['business_name'] = $biz ? $biz['name'] : 'Manajer Akuntansi';
+                    }
+
+                    header('Location: dashboard.php');
+                    exit;
+                }
+            } else {
+                // Catat percobaan gagal
+                $ins = $pdo->prepare("INSERT INTO failed_logins (email, ip_address) VALUES (?, ?)");
+                $ins->execute([$email, $ip]);
+                $error = 'Email atau password salah.';
+            }
         }
     }
 }
@@ -682,6 +733,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php endif; ?>
 
       <form method="POST" action="" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <div class="form-group">
           <label for="email">Email</label>
           <div class="input-wrapper">

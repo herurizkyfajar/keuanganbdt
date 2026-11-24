@@ -8,6 +8,16 @@ $stmt->execute([$userId]);
 $user = $stmt->fetch();
 
 $message = '';
+
+// Validasi CSRF token untuk semua aksi POST
+$csrfValid = true;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $message = '<div class="alert alert-danger">Permintaan tidak valid. Silakan coba lagi.</div>';
+        $csrfValid = false;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_profile') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -32,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_password') {
+if ($csrfValid && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_password') {
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -64,6 +74,7 @@ document.getElementById('pageSubtitle').textContent = 'Kelola data pribadi dan k
   <div class="section-header"><i class="bi bi-person"></i> Profil Akun</div>
   <div class="section-body">
     <form method="POST" action="">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
       <input type="hidden" name="action" value="update_profile">
       <div class="form-grid">
         <div class="form-col-2">
@@ -88,6 +99,7 @@ document.getElementById('pageSubtitle').textContent = 'Kelola data pribadi dan k
   <div class="section-header"><i class="bi bi-key"></i> Ubah Kata Sandi</div>
   <div class="section-body">
     <form method="POST" action="" style="max-width:420px;">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
       <input type="hidden" name="action" value="change_password">
       <div class="form-group">
         <label class="form-label">Password Saat Ini</label>
