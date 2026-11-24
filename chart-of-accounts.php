@@ -481,27 +481,36 @@ document.getElementById('pageSubtitle').textContent = 'Daftar rekening akuntansi
 
       <!-- Modal Edit Akun -->
       <div class="modal-overlay" id="modalEditAccount">
-        <div class="modal" style="max-width:500px;">
+        <div class="modal modal-modern" style="max-width:560px;">
           <form method="POST" action="">
             <input type="hidden" name="action" value="update_account">
             <input type="hidden" id="editAccountId" name="id">
-            <div class="modal-header">
-              <div class="modal-title">Edit Akun</div>
-              <button class="modal-close" type="button" onclick="closeModal('modalEditAccount')">&times;</button>
+            <div class="mdlg-header">
+              <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+                <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+                <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+              </svg>
+              <div class="mdlg-header-icon"><i class="bi bi-pencil-square"></i></div>
+              <div class="mdlg-header-text">
+                <div class="mdlg-header-title">Edit Akun</div>
+                <div class="mdlg-header-sub">Perbarui data akun</div>
+              </div>
+              <button type="button" class="mdlg-close" onclick="closeModal('modalEditAccount')" aria-label="Tutup">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="mdlg-body">
               <div class="form-grid">
                 <div>
-                  <label class="form-label">Kode Akun</label>
-                  <input type="text" id="editCode" name="code" class="form-control" required>
+                  <label class="mdlg-label" for="editCode"><i class="bi bi-hash"></i> Kode Akun <span class="req">*</span></label>
+                  <input type="text" id="editCode" name="code" class="mdlg-input" required>
                 </div>
                 <div>
-                  <label class="form-label">Nama Akun</label>
-                  <input type="text" id="editName" name="name" class="form-control" required>
+                  <label class="mdlg-label" for="editName"><i class="bi bi-fonts"></i> Nama Akun <span class="req">*</span></label>
+                  <input type="text" id="editName" name="name" class="mdlg-input" required>
                 </div>
                 <div class="form-col-2">
-                  <label class="form-label">Tipe Akun</label>
-                  <select id="editType" name="type" class="form-select" required>
+                  <label class="mdlg-label" for="editType"><i class="bi bi-layers"></i> Tipe Akun <span class="req">*</span></label>
+                  <select id="editType" name="type" class="mdlg-input" required>
                     <option value="asset">Aset</option>
                     <option value="bank">Bank</option>
                     <option value="liability">Kewajiban</option>
@@ -511,8 +520,8 @@ document.getElementById('pageSubtitle').textContent = 'Daftar rekening akuntansi
                   </select>
                 </div>
                 <div>
-                  <label class="form-label">Akun Induk</label>
-                  <select id="editParentId" name="parent_id" class="form-select">
+                  <label class="mdlg-label" for="editParentId"><i class="bi bi-diagram-2"></i> Akun Induk</label>
+                  <select id="editParentId" name="parent_id" class="mdlg-input">
                     <option value="">(Akun Utama)</option>
                     <?php foreach ($allAccounts as $a): ?>
                       <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -520,20 +529,24 @@ document.getElementById('pageSubtitle').textContent = 'Daftar rekening akuntansi
                   </select>
                 </div>
                 <div class="form-col-2">
-                  <label class="form-label">Deskripsi</label>
-                  <input type="text" id="editDescription" name="description" class="form-control" placeholder="Opsional">
+                  <label class="mdlg-label" for="editDescription"><i class="bi bi-journal-text"></i> Deskripsi</label>
+                  <input type="text" id="editDescription" name="description" class="mdlg-input" placeholder="Opsional">
                 </div>
                 <div class="form-col-2">
-                  <label class="form-label" style="display:flex; align-items:center; gap:0.5rem;">
+                  <label class="mdlg-label" for="editIsActive" style="margin-bottom:0;">
                     <input type="checkbox" id="editIsActive" name="is_active" value="1" checked>
-                    Aktif
+                    Akun aktif
                   </label>
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <button class="btn btn-outline" onclick="closeModal('modalEditAccount')">Batal</button>
-              <button class="btn btn-primary">Simpan Perubahan</button>
+            <div class="mdlg-footer">
+              <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+                <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+              </svg>
+              <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalEditAccount')">Batal</button>
+              <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan Perubahan</button>
             </div>
           </form>
         </div>
@@ -654,23 +667,32 @@ function editGroup(data) {
 </script>
 <!-- Modal Edit Grup Akun -->
 <div class="modal-overlay" id="modalEditGroup">
-  <div class="modal" style="max-width:500px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
       <input type="hidden" name="action" value="edit_group">
       <input type="hidden" id="editGroupId" name="id">
-      <div class="modal-header">
-        <div class="modal-title">Edit Grup Akun</div>
-        <button class="modal-close" type="button" onclick="closeModal('modalEditGroup')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-folder2-open"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Edit Grup Akun</div>
+          <div class="mdlg-header-sub">Perbarui data grup akun</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalEditGroup')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="mdlg-body">
         <div class="form-grid">
           <div class="form-col-2">
-            <label class="form-label">Nama Grup</label>
-            <input type="text" id="editGroupName" name="name" class="form-control" placeholder="Contoh: Aset Tetap" required>
+            <label class="mdlg-label" for="editGroupName"><i class="bi bi-folder"></i> Nama Grup <span class="req">*</span></label>
+            <input type="text" id="editGroupName" name="name" class="mdlg-input" placeholder="Contoh: Aset Tetap" required>
           </div>
           <div>
-            <label class="form-label">Tipe Grup</label>
-            <select id="editGroupType" name="type" class="form-select" required>
+            <label class="mdlg-label" for="editGroupType"><i class="bi bi-layers"></i> Tipe Grup <span class="req">*</span></label>
+            <select id="editGroupType" name="type" class="mdlg-input" required>
               <option value="asset">Aset</option>
               <option value="bank">Bank</option>
               <option value="liability">Kewajiban</option>
@@ -680,36 +702,49 @@ function editGroup(data) {
             </select>
           </div>
           <div class="form-col-2">
-            <label class="form-label">Deskripsi</label>
-            <input type="text" id="editGroupDesc" name="description" class="form-control" placeholder="Opsional">
+            <label class="mdlg-label" for="editGroupDesc"><i class="bi bi-journal-text"></i> Deskripsi</label>
+            <input type="text" id="editGroupDesc" name="description" class="mdlg-input" placeholder="Opsional">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalEditGroup')">Batal</button>
-        <button class="btn btn-primary">Simpan Perubahan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalEditGroup')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan Perubahan</button>
       </div>
     </form>
   </div>
 </div>
 <!-- Modal Tambah Grup Akun -->
 <div class="modal-overlay" id="modalAddGroup">
-  <div class="modal" style="max-width:500px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
       <input type="hidden" name="action" value="add_group">
-      <div class="modal-header">
-        <div class="modal-title">Tambah Grup Akun</div>
-        <button class="modal-close" type="button" onclick="closeModal('modalAddGroup')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-folder-plus"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Tambah Grup Akun</div>
+          <div class="mdlg-header-sub">Buat grup akun baru</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddGroup')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="mdlg-body">
         <div class="form-grid">
           <div class="form-col-2">
-            <label class="form-label">Nama Grup</label>
-            <input type="text" id="modalGroupName" name="name" class="form-control" placeholder="Contoh: Aset Tetap" required>
+            <label class="mdlg-label" for="modalGroupName"><i class="bi bi-folder"></i> Nama Grup <span class="req">*</span></label>
+            <input type="text" id="modalGroupName" name="name" class="mdlg-input" placeholder="Contoh: Aset Tetap" required>
           </div>
           <div>
-            <label class="form-label">Tipe Grup</label>
-            <select id="modalGroupType" name="type" class="form-select" required>
+            <label class="mdlg-label" for="modalGroupType"><i class="bi bi-layers"></i> Tipe Grup <span class="req">*</span></label>
+            <select id="modalGroupType" name="type" class="mdlg-input" required>
               <option value="asset">Aset</option>
               <option value="bank">Bank</option>
               <option value="liability">Kewajiban</option>
@@ -719,14 +754,18 @@ function editGroup(data) {
             </select>
           </div>
           <div class="form-col-2">
-            <label class="form-label">Deskripsi</label>
-            <input type="text" name="description" class="form-control" placeholder="Opsional">
+            <label class="mdlg-label"><i class="bi bi-journal-text"></i> Deskripsi</label>
+            <input type="text" name="description" class="mdlg-input" placeholder="Opsional">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddGroup')">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddGroup')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan</button>
       </div>
     </form>
   </div>
@@ -734,26 +773,36 @@ function editGroup(data) {
 
 <!-- Modal Tambah Akun -->
 <div class="modal-overlay" id="modalAddAccount">
-  <div class="modal" style="max-width:500px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="" id="modalAddAccountForm">
       <input type="hidden" name="action" value="add_account">
-      <div class="modal-header">
-        <div class="modal-title">Tambah Akun</div>
-        <button class="modal-close" type="button" onclick="closeModal('modalAddAccount')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-journal-plus"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Tambah Akun</div>
+          <div class="mdlg-header-sub">Buat akun baru di bagan akun</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddAccount')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="mdlg-body">
         <div class="form-grid">
           <div>
-            <label class="form-label">Kode Akun</label>
-            <input type="text" id="modalAddAccountCode" name="code" class="form-control" placeholder="Contoh: 110" required>
+            <label class="mdlg-label" for="modalAddAccountCode"><i class="bi bi-hash"></i> Kode Akun <span class="req">*</span></label>
+            <input type="text" id="modalAddAccountCode" name="code" class="mdlg-input" placeholder="Contoh: 110" required>
           </div>
           <div>
-            <label class="form-label">Nama Akun</label>
-            <input type="text" id="modalAddAccountName" name="name" class="form-control" placeholder="Contoh: Kas" required>
+            <label class="mdlg-label" for="modalAddAccountName"><i class="bi bi-fonts"></i> Nama Akun <span class="req">*</span></label>
+            <input type="text" id="modalAddAccountName" name="name" class="mdlg-input" placeholder="Contoh: Kas" required>
           </div>
           <div class="form-col-2">
-            <label class="form-label">Tipe Akun</label>
-            <select id="modalAddAccountType" name="type" class="form-select" required>
+            <label class="mdlg-label" for="modalAddAccountType"><i class="bi bi-layers"></i> Tipe Akun <span class="req">*</span></label>
+            <select id="modalAddAccountType" name="type" class="mdlg-input" required>
+              <option value="">Pilih tipe akun</option>
               <option value="asset">Aset</option>
               <option value="bank">Bank</option>
               <option value="liability">Kewajiban</option>
@@ -763,8 +812,8 @@ function editGroup(data) {
             </select>
           </div>
           <div>
-            <label class="form-label">Akun Induk</label>
-            <select id="modalAddAccountParent" name="parent_id" class="form-select">
+            <label class="mdlg-label" for="modalAddAccountParent"><i class="bi bi-diagram-2"></i> Akun Induk</label>
+            <select id="modalAddAccountParent" name="parent_id" class="mdlg-input">
               <option value="">(Akun Utama)</option>
               <?php foreach ($allAccounts as $a): ?>
                 <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -772,14 +821,18 @@ function editGroup(data) {
             </select>
           </div>
           <div class="form-col-2">
-            <label class="form-label">Deskripsi</label>
-            <input type="text" id="modalAddAccountDesc" name="description" class="form-control" placeholder="Opsional">
+            <label class="mdlg-label" for="modalAddAccountDesc"><i class="bi bi-journal-text"></i> Deskripsi</label>
+            <input type="text" id="modalAddAccountDesc" name="description" class="mdlg-input" placeholder="Opsional">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddAccount')">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddAccount')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan</button>
       </div>
     </form>
   </div>
