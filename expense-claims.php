@@ -141,82 +141,91 @@ document.getElementById('pageActions').innerHTML = `
 
 <!-- Modal Tambah Klaim -->
 <div class="modal-overlay" id="modalAddExpense">
-  <div class="modal" style="max-width:760px;">
+  <div class="modal modal-modern" style="max-width:840px;">
     <form method="POST" action="" onsubmit="return validateExpense(this)">
       <input type="hidden" name="action" value="add_expense_claim">
-      <div class="modal-header">
-        <div class="modal-title">Buat Klaim Biaya</div>
-        <button class="modal-close" onclick="closeModal('modalAddExpense')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-wallet2"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Buat Klaim Biaya</div>
+          <div class="mdlg-header-sub">Input detail klaim karyawan</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddExpense')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Nama Karyawan</label>
-            <input type="text" name="employee_name" class="form-control" placeholder="Contoh: Budi Santoso" required>
+      <div class="mdlg-body">
+        <div class="mdlg-grid">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="expEmployee"><i class="bi bi-person"></i> Nama Karyawan <span class="req">*</span></label>
+            <input type="text" id="expEmployee" name="employee_name" class="mdlg-input" placeholder="Contoh: Budi Santoso" required>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">Tanggal Klaim</label>
-            <input type="date" name="claim_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="expDate"><i class="bi bi-calendar-event"></i> Tanggal Klaim <span class="req">*</span></label>
+            <input type="date" id="expDate" name="claim_date" class="mdlg-input" value="<?= date('Y-m-d') ?>" required>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">Status</label>
-            <select name="status" class="form-select">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="expStatus"><i class="bi bi-envelope"></i> Status</label>
+            <select id="expStatus" name="status" class="mdlg-input">
               <option value="draft">Draft</option>
               <option value="submitted">Diajukan</option>
             </select>
           </div>
         </div>
-        <div class="table-responsive">
-          <table class="data-table" id="expLines">
+
+        <div class="table-responsive mdlg-table-wrap">
+          <table class="mdlg-table" id="expLines">
+            <colgroup>
+              <col style="width:22%">
+              <col style="width:48%">
+              <col style="width:22%">
+              <col style="width:8%">
+            </colgroup>
             <thead>
               <tr>
-                <th style="width:22%">AKUN</th>
-                <th style="width:30%">DESKRIPSI</th>
-                <th class="text-right" style="width:22%">JUMLAH</th>
-                <th class="text-right" style="width:10%"></th>
+                <th>Akun</th>
+                <th>Deskripsi</th>
+                <th class="text-right">Jumlah</th>
+                <th class="text-right"></th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <select name="line_account_id[]" class="form-select form-select-sm" required>
-                    <option value="">Pilih akun</option>
-                    <?php foreach ($accounts as $a): ?>
-                      <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                </td>
-                <td><input type="text" name="line_desc[]" class="form-control form-control-sm" placeholder="Deskripsi"></td>
-                <td class="text-right"><input type="number" name="line_amount[]" class="form-control form-control-sm" step="0.01" min="0" value="0"></td>
-                <td class="text-right"><button type="button" class="btn btn-outline btn-sm rem"><i class="bi bi-trash"></i></button></td>
-              </tr>
-              <tr>
-                <td>
-                  <select name="line_account_id[]" class="form-select form-select-sm" required>
-                    <option value="">Pilih akun</option>
-                    <?php foreach ($accounts as $a): ?>
-                      <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                </td>
-                <td><input type="text" name="line_desc[]" class="form-control form-control-sm" placeholder="Deskripsi"></td>
-                <td class="text-right"><input type="number" name="line_amount[]" class="form-control form-control-sm" step="0.01" min="0" value="0"></td>
-                <td class="text-right"><button type="button" class="btn btn-outline btn-sm rem"><i class="bi bi-trash"></i></button></td>
-              </tr>
+              <?php for ($i = 0; $i < 2; $i++): ?>
+                <tr>
+                  <td>
+                    <select name="line_account_id[]" class="mdlg-input" required>
+                      <option value="">Pilih akun</option>
+                      <?php foreach ($accounts as $a): ?>
+                        <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </td>
+                  <td><input type="text" name="line_desc[]" class="mdlg-input" placeholder="Deskripsi"></td>
+                  <td class="text-right"><input type="number" name="line_amount[]" class="mdlg-input" step="0.01" min="0" value="0"></td>
+                  <td class="text-right mdlg-act"><button type="button" class="mdlg-btn-del" title="Hapus baris"><i class="bi bi-trash"></i></button></td>
+                </tr>
+              <?php endfor; ?>
             </tbody>
           </table>
         </div>
-        <div class="text-end mt-2">
-          <button type="button" class="btn btn-outline btn-sm" id="addExpenseLine">+ Tambah Baris</button>
-        </div>
+
+        <button type="button" class="mdlg-btn-add" id="addExpenseLine"><i class="bi bi-plus-lg"></i> Tambah Baris</button>
+
         <div class="mt-2">
-          <label class="form-label">Catatan</label>
-          <textarea name="notes" class="form-control" rows="2"></textarea>
+          <label class="mdlg-label" for="expNotes"><i class="bi bi-chat-text"></i> Catatan</label>
+          <textarea id="expNotes" name="notes" class="mdlg-input" rows="2"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddExpense')">Batal</button>
-        <button class="btn btn-primary">Simpan Klaim</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddExpense')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan Klaim</button>
       </div>
     </form>
   </div>
@@ -232,11 +241,11 @@ document.getElementById('addExpenseLine')?.addEventListener('click', function ()
   row.querySelectorAll('input,select').forEach(el => el.value = '');
   tbody.appendChild(row);
 });
-document.querySelectorAll('.rem').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const tbody = document.querySelector('#expLines tbody');
-    if (tbody.children.length > 1) this.closest('tr').remove();
-  });
+document.querySelector('#expLines tbody')?.addEventListener('click', function (e) {
+  const btn = e.target.closest('.mdlg-btn-del');
+  if (!btn) return;
+  const tbody = document.querySelector('#expLines tbody');
+  if (tbody.children.length > 1) btn.closest('tr').remove();
 });
 function validateExpense(form) { return true; }
 </script>

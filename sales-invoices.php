@@ -182,88 +182,110 @@ document.getElementById('pageActions').innerHTML = `
 
 <!-- Modal Tambah Faktur -->
 <div class="modal-overlay" id="modalAddInvoice">
-  <div class="modal" style="max-width:820px;">
+  <div class="modal modal-modern" style="max-width:900px;">
     <form method="POST" action="" onsubmit="return calcInvoice(this)">
       <input type="hidden" name="action" value="add_sales_invoice">
-      <div class="modal-header">
-        <div class="modal-title">Buat Faktur Penjualan</div>
-        <button class="modal-close" onclick="closeModal('modalAddInvoice')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-receipt-cutoff"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Buat Faktur Penjualan</div>
+          <div class="mdlg-header-sub">Input barang/jasa dan pelanggan</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddInvoice')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Pelanggan</label>
-            <select name="customer_id" class="form-select" required>
+      <div class="mdlg-body">
+        <div class="mdlg-grid">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="sInvCustomer"><i class="bi bi-person"></i> Pelanggan <span class="req">*</span></label>
+            <select id="sInvCustomer" name="customer_id" class="mdlg-input" required>
               <option value="">Pilih pelanggan</option>
               <?php foreach ($customers as $c): ?>
                 <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Nomor Faktur</label>
-            <input type="text" name="invoice_number" class="form-control" placeholder="INV-0001" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="sInvNumber"><i class="bi bi-file-earmark-text"></i> Nomor Faktur <span class="req">*</span></label>
+            <input type="text" id="sInvNumber" name="invoice_number" class="mdlg-input" placeholder="INV-0001" required>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Tanggal Faktur</label>
-            <input type="date" name="invoice_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="sInvDate"><i class="bi bi-calendar-event"></i> Tanggal Faktur <span class="req">*</span></label>
+            <input type="date" id="sInvDate" name="invoice_date" class="mdlg-input" value="<?= date('Y-m-d') ?>" required>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">Jatuh Tempo</label>
-            <input type="date" name="due_date" class="form-control">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="sInvDueDate"><i class="bi bi-clock"></i> Jatuh Tempo</label>
+            <input type="date" id="sInvDueDate" name="due_date" class="mdlg-input">
           </div>
         </div>
-        <div class="table-responsive mb-2">
-          <table class="data-table" id="invLines">
+
+        <div class="table-responsive mdlg-table-wrap">
+          <table class="mdlg-table" id="invLines">
+            <colgroup>
+              <col style="width:14%">
+              <col style="width:30%">
+              <col style="width:10%">
+              <col style="width:18%">
+              <col style="width:18%">
+              <col style="width:8%">
+            </colgroup>
             <thead>
               <tr>
-                <th style="width:14%">ITEM</th>
-                <th style="width:30%">DESKRIPSI</th>
-                <th class="text-right" style="width:10%">QTY</th>
-                <th class="text-right" style="width:18%">HARGA SATUAN</th>
-                <th class="text-right" style="width:18%">JUMLAH</th>
-                <th class="text-right" style="width:8%"></th>
+                <th>ITEM</th>
+                <th>Deskripsi</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Harga Satuan</th>
+                <th class="text-right">Jumlah</th>
+                <th class="text-right"></th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>
-                  <select name="line_item_id[]" class="form-select form-select-sm">
+                  <select name="line_item_id[]" class="mdlg-input">
                     <option value="">Pilih item</option>
                     <?php foreach ($items as $it): ?>
                       <option value="<?= $it['id'] ?>" data-price="<?= $it['sales_price'] ?>"><?= htmlspecialchars($it['code'] . ' - ' . $it['name']) ?></option>
                     <?php endforeach; ?>
                   </select>
                 </td>
-                <td><input type="text" name="line_desc[]" class="form-control form-control-sm" placeholder="Deskripsi"></td>
-                <td class="text-right"><input type="number" name="line_qty[]" class="form-control form-control-sm qty" step="0.01" min="0" value="1"></td>
-                <td class="text-right"><input type="number" name="line_price[]" class="form-control form-control-sm price" step="0.01" min="0" value="0"></td>
+                <td><input type="text" name="line_desc[]" class="mdlg-input" placeholder="Deskripsi"></td>
+                <td class="text-right"><input type="number" name="line_qty[]" class="mdlg-input qty" step="0.01" min="0" value="1"></td>
+                <td class="text-right"><input type="number" name="line_price[]" class="mdlg-input price" step="0.01" min="0" value="0"></td>
                 <td class="text-right amount-col line-amount">0</td>
-                <td class="text-right"><button type="button" class="btn btn-outline btn-sm rem"><i class="bi bi-trash"></i></button></td>
+                <td class="text-right mdlg-act"><button type="button" class="mdlg-btn-del" title="Hapus baris"><i class="bi bi-trash"></i></button></td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="text-end mt-2">
-          <button type="button" class="btn btn-outline btn-sm" id="addInvLine">+ Tambah Baris</button>
-        </div>
-        <div class="row mt-3">
-          <div class="col-md-6">
-            <label class="form-label">Catatan</label>
-            <textarea name="notes" class="form-control" rows="2"></textarea>
+
+        <button type="button" class="mdlg-btn-add" id="addInvLine"><i class="bi bi-plus-lg"></i> Tambah Baris</button>
+
+        <div class="mdlg-footer-row mt-3">
+          <div class="mdlg-col-6">
+            <label class="mdlg-label" for="sInvNotes"><i class="bi bi-chat-text"></i> Catatan</label>
+            <textarea id="sInvNotes" name="notes" class="mdlg-input" rows="2"></textarea>
           </div>
-          <div class="col-md-6 d-flex flex-column justify-content-end">
-            <label class="form-label">Status</label>
-            <select name="status" class="form-select">
+          <div class="mdlg-col-6 mdlg-flex-end">
+            <label class="mdlg-label" for="sInvStatus"><i class="bi bi-envelope"></i> Status</label>
+            <select id="sInvStatus" name="status" class="mdlg-input">
               <option value="draft">Draft</option>
               <option value="sent">Terkirim</option>
             </select>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddInvoice')">Batal</button>
-        <button class="btn btn-primary">Simpan Faktur</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddInvoice')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan Faktur</button>
       </div>
     </form>
   </div>
@@ -280,11 +302,11 @@ document.getElementById('addInvLine')?.addEventListener('click', function () {
   row.querySelector('.line-amount').textContent = '0';
   tbody.appendChild(row);
 });
-document.querySelectorAll('.rem').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const tbody = document.querySelector('#invLines tbody');
-    if (tbody.children.length > 1) this.closest('tr').remove();
-  });
+document.querySelector('#invLines tbody')?.addEventListener('click', function (e) {
+  const btn = e.target.closest('.mdlg-btn-del');
+  if (!btn) return;
+  const tbody = document.querySelector('#invLines tbody');
+  if (tbody.children.length > 1) btn.closest('tr').remove();
 });
 document.addEventListener('input', function (e) {
   const row = e.target.closest('tr');

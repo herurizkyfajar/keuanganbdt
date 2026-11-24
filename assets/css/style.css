@@ -557,6 +557,77 @@ table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; 
   transform: translateY(-1px); box-shadow: 0 8px 20px rgba(13, 110, 253, 0.38);
 }
 
+/* ---------- Modal form grid & fields ---------- */
+.mdlg-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.5rem; margin-bottom: 1.25rem;
+}
+.mdlg-field { min-width: 0; }
+.mdlg-label {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.875rem; font-weight: 700; color: #1f2a3d; margin-bottom: 0.5rem;
+}
+.mdlg-label i { color: var(--primary); font-size: 0.95rem; }
+.mdlg-label .req { color: #e5484d; font-weight: 700; }
+.mdlg-input {
+  width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #dfe6ef; border-radius: 0.6rem;
+  font-size: 0.9rem; background: #fff; color: var(--text); font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.mdlg-input::placeholder { color: #9aa6b8; }
+.mdlg-input:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.13);
+}
+.mdlg-input[multiple], textarea.mdlg-input { resize: vertical; min-height: 92px; line-height: 1.55; }
+select.mdlg-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%236c757d' d='M7.247 11.14 2.514 5.521A.5.5 0 0 1 3 5.27l4 4a.5.5 0 0 0 .707 0l4-4a.5.5 0 0 1 .707 0l1 1.15a.5.5 0 0 1-.707.707L8.5 9.793l-2.854 2.853a.5.5 0 0 1-.707 0z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 0.85rem center; background-size: 12px;
+  padding-right: 2.3rem; cursor: pointer;
+}
+
+/* ---------- Modal tables ---------- */
+.mdlg-table-wrap {
+  border: 1px solid #e3eaf4; border-radius: 0.85rem;
+  overflow-x: auto; overflow-y: hidden; background: #fff;
+  margin-bottom: 1rem;
+}
+table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 640px; }
+.mdlg-table thead th {
+  background: linear-gradient(180deg, #eaf3fe 0%, #e1edfd 100%);
+  color: #1560c9; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; text-align: left; white-space: nowrap;
+  padding: 0.85rem 0.9rem; border-bottom: 1px solid #d5e5fa;
+}
+.mdlg-table td {
+  padding: 0.6rem 0.9rem; border-bottom: 1px solid #eef2f8;
+  vertical-align: middle; font-size: 0.875rem;
+}
+.mdlg-table tbody tr:last-child td { border-bottom: none; }
+.mdlg-table tbody tr:hover { background: #fbfdff; }
+.mdlg-table .mdlg-input { padding: 0.55rem 0.7rem; border-radius: 0.55rem; font-size: 0.85rem; }
+.mdlg-act { text-align: center; }
+.mdlg-btn-del {
+  width: 34px; height: 34px; display: inline-grid; place-items: center; border: none;
+  border-radius: 0.55rem; background: #fdecec; color: #e5484d;
+  font-size: 0.95rem; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.mdlg-btn-del:hover { background: #fbdbdb; color: #c92a2a; }
+.mdlg-btn-add {
+  display: inline-flex; align-items: center; gap: 0.45rem; margin-top: 1.15rem;
+  padding: 0.65rem 1.2rem; border: 1px solid #cfefdb; border-radius: 2rem;
+  background: #e9f9ef; color: #2f9e44; font-size: 0.875rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.mdlg-btn-add:hover { background: #d8f4e2; border-color: #b3e5c3; }
+
+/* Footer helpers for modals with two-col content */
+.mdlg-footer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem; }
+.mdlg-col-6 { min-width: 0; }
+.mdlg-flex-end { display: flex; flex-direction: column; justify-content: flex-end; }
+
+
 /* ---------- Utilities ---------- */
 .text-right { text-align: right; }
 .text-center { text-align: center; }
@@ -702,6 +773,7 @@ table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; 
 
   /* ---------- Modal Jurnal mobile ---------- */
   .mdlg-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .mdlg-footer-row { grid-template-columns: 1fr; gap: 1rem; }
   .mdlg-header { padding: 1.1rem 1.15rem; gap: 0.75rem; }
   .mdlg-header-icon { width: 44px; height: 44px; font-size: 1.3rem; border-radius: 0.75rem; }
   .mdlg-header-title { font-size: 1.15rem; }
