@@ -268,6 +268,26 @@ document.getElementById('pageActions').innerHTML = `
         </thead>
         <tbody>
         <?php
+        // Pagination: default 20 data per halaman
+        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $perPage = 20;
+        $offset = ($page - 1) * $perPage;
+
+        // Hitung total data untuk pagination
+        $countStmt = $pdo->prepare("
+          SELECT COUNT(DISTINCT t.id) AS total
+          FROM transactions t
+          WHERE t.business_id = ?
+        ");
+        $countStmt->execute([$businessId]);
+        $totalRows = (int) $countStmt->fetchColumn();
+        $totalPages = (int) ceil($totalRows / $perPage);
+        if ($totalPages > 0 && $page > $totalPages) {
+            $page = $totalPages;
+            $offset = ($page - 1) * $perPage;
+        }
+
         $stmt = $pdo->prepare("
           SELECT t.id, t.reference, t.description, t.transaction_date, t.type,
                  COALESCE(SUM(l.debit),0) AS total_debit,
@@ -277,11 +297,14 @@ document.getElementById('pageActions').innerHTML = `
           WHERE t.business_id = ?
           GROUP BY t.id
           ORDER BY t.transaction_date DESC, t.id DESC
-          LIMIT 100
+          LIMIT ? OFFSET ?
         ");
-        $stmt->execute([$businessId]);
+        $stmt->bindValue(1, $businessId, PDO::PARAM_INT);
+        $stmt->bindValue(2, (int) $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(3, (int) $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $rows = $stmt->fetchAll();
-        if ($rows): $no = 1; foreach ($rows as $r): ?>
+        if ($rows): $no = $offset + 1; foreach ($rows as $r): ?>
           <tr>
             <td><?= $no++ ?></td>
             <td><?= date('d M Y', strtotime($r['transaction_date'])) ?></td>
@@ -295,6 +318,7 @@ document.getElementById('pageActions').innerHTML = `
               <?php if (!$viewId): ?>
                 <a class="btn btn-outline btn-sm" href="journal-entries.php?view=<?= $r['id'] ?>&edit=1" style="margin-left:2px;"><i class="bi bi-pencil-square" style="color:var(--primary);"></i></a>
                 <form style="display:inline;" method="POST" action="" onsubmit="return confirm('Yakin ingin menghapus jurnal ini?');">
+                  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                   <input type="hidden" name="action" value="delete_tx">
                   <input type="hidden" name="tx_id" value="<?= $r['id'] ?>">
                   <button type="submit" class="btn btn-outline btn-sm" style="margin-left:2px;color:var(--danger);"><i class="bi bi-trash"></i></button>
@@ -308,6 +332,32 @@ document.getElementById('pageActions').innerHTML = `
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <?php if ($totalPages > 1): ?>
+    <nav class="mt-2" aria-label="Pagination">
+      <ul class="pagination justify-content-center">
+        <!-- Previous -->
+        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+          <a class="page-link" href="journal-entries.php?page=<?= $page - 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>">Sebelumnya</a>
+        </li>
+        <!-- Pages -->
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+          <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+            <a class="page-link" href="journal-entries.php?page=<?= $i ?><?= $viewId ? '&view=' . $viewId : '' ?>"><?= $i ?></a>
+          </li>
+        <?php endfor; ?>
+        <!-- Next -->
+        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+          <a class="page-link" href="journal-entries.php?page=<?= $page + 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>">Selanjutnya</a>
+        </li>
+      </ul>
+      <p class="text-muted small text-center mt-1">
+        Menampilkan <?= $offset + 1 ?> – <?= min($offset + $perPage, $totalRows) ?> dari <?= $totalRows ?> data
+      </p>
+    </nav>
+    <?php endif; ?>
+
   </div>
 </div>
 <?php endif; ?>
