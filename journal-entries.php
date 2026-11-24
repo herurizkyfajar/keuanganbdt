@@ -335,26 +335,142 @@ document.getElementById('pageActions').innerHTML = `
 
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-    <nav class="mt-2" aria-label="Pagination">
-      <ul class="pagination justify-content-center">
+    <style>
+      .je-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      .je-pagination .je-info {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .je-pagination .je-pages {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+      }
+      .je-pagination a.je-page-link,
+      .je-pagination span.je-page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.6rem;
+        height: 2.6rem;
+        padding: 0 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.825rem;
+        font-weight: 600;
+        transition: all 0.18s ease;
+        background: #ffffff;
+      }
+      .je-pagination a.je-page-link:hover:not(.je-active) {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #eef4ff;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(13,110,253,0.12);
+      }
+      .je-pagination a.je-page-link.je-active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(13,110,253,0.25);
+      }
+      .je-pagination a.je-page-link.je-disabled,
+      .je-pagination span.je-page-link.je-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .je-pagination a.je-page-link.je-disabled:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--border);
+        color: var(--muted);
+        background: #ffffff;
+      }
+      .je-pagination .je-ellipsis {
+        font-size: 0.85rem;
+        color: var(--muted);
+        padding: 0 0.35rem;
+        font-weight: 700;
+      }
+    </style>
+    <nav class="je-pagination" aria-label="Pagination">
+      <div class="je-info">
+        Menampilkan <strong><?= $offset + 1 ?></strong> –
+        <strong><?= min($offset + $perPage, $totalRows) ?></strong>
+        dari <strong><?= $totalRows ?></strong> data
+      </div>
+
+      <div class="je-pages">
+        <!-- First -->
+        <?php if ($page > 1): ?>
+          <a class="je-page-link" href="journal-entries.php?page=1<?= $viewId ? '&view=' . $viewId : '' ?>" title="Awal">
+            <i class="bi bi-back"></i>
+          </a>
+        <?php else: ?>
+          <span class="je-page-link je-disabled" aria-hidden="true"><i class="bi bi-back"></i></span>
+        <?php endif; ?>
+
         <!-- Previous -->
-        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-          <a class="page-link" href="journal-entries.php?page=<?= $page - 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>">Sebelumnya</a>
-        </li>
-        <!-- Pages -->
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-          <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-            <a class="page-link" href="journal-entries.php?page=<?= $i ?><?= $viewId ? '&view=' . $viewId : '' ?>"><?= $i ?></a>
-          </li>
+        <?php if ($page > 1): ?>
+          <a class="je-page-link" href="journal-entries.php?page=<?= $page - 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>" title="Sebelumnya">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+        <?php else: ?>
+          <span class="je-page-link je-disabled" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+        <?php endif; ?>
+
+        <!-- Page numbers with ellipsis -->
+        <?php
+        $showFirst = false;
+        $showLast = false;
+        $start = max(1, $page - 2);
+        $end = min($totalPages, $page + 2);
+        if ($start > 1) $showFirst = true;
+        if ($end < $totalPages) $showLast = true;
+        if ($showFirst): ?>
+          <a class="je-page-link" href="journal-entries.php?page=1<?= $viewId ? '&view=' . $viewId : '' ?>">1</a>
+          <span class="je-ellipsis">&hellip;</span>
+        <?php endif; ?>
+        <?php for ($i = $start; $i <= $end; $i++): ?>
+          <a class="je-page-link <?= $i === $page ? 'je-active' : '' ?>" href="journal-entries.php?page=<?= $i ?><?= $viewId ? '&view=' . $viewId : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
+        <?php if ($showLast): ?>
+          <span class="je-ellipsis">&hellip;</span>
+          <a class="je-page-link" href="journal-entries.php?page=<?= $totalPages ?><?= $viewId ? '&view=' . $viewId : '' ?>"><?= $totalPages ?></a>
+        <?php endif; ?>
+
         <!-- Next -->
-        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-          <a class="page-link" href="journal-entries.php?page=<?= $page + 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>">Selanjutnya</a>
-        </li>
-      </ul>
-      <p class="text-muted small text-center mt-1">
-        Menampilkan <?= $offset + 1 ?> – <?= min($offset + $perPage, $totalRows) ?> dari <?= $totalRows ?> data
-      </p>
+        <?php if ($page < $totalPages): ?>
+          <a class="je-page-link" href="journal-entries.php?page=<?= $page + 1 ?><?= $viewId ? '&view=' . $viewId : '' ?>" title="Selanjutnya">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        <?php else: ?>
+          <span class="je-page-link je-disabled" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+        <?php endif; ?>
+
+        <!-- Last -->
+        <?php if ($page < $totalPages): ?>
+          <a class="je-page-link" href="journal-entries.php?page=<?= $totalPages ?><?= $viewId ? '&view=' . $viewId : '' ?>" title="Akhir">
+            <i class="bi bi-forward"></i>
+          </a>
+        <?php else: ?>
+          <span class="je-page-link je-disabled" aria-hidden="true"><i class="bi bi-forward"></i></span>
+        <?php endif; ?>
+      </div>
     </nav>
     <?php endif; ?>
 
