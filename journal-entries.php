@@ -314,74 +314,102 @@ document.getElementById('pageActions').innerHTML = `
 
 <!-- Modal Tambah Jurnal -->
 <div class="modal-overlay" id="modalAddTx">
-  <div class="modal" style="max-width:1100px;">
+  <div class="modal modal-journal">
     <form method="POST" action="" onsubmit="return validateTx(this)">
       <input type="hidden" name="action" value="add_tx">
-      <div class="modal-header">
-        <div class="modal-title">Buat Jurnal Baru</div>
-        <button class="modal-close" onclick="closeModal('modalAddTx')">&times;</button>
+
+      <div class="jrn-header">
+        <svg class="jrn-deco jrn-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="jrn-header-icon"><i class="bi bi-file-earmark-plus"></i></div>
+        <div class="jrn-header-text">
+          <div class="jrn-header-title">Buat Jurnal Baru</div>
+          <div class="jrn-header-sub">Input transaksi jurnal umum</div>
+        </div>
+        <button type="button" class="jrn-close" onclick="closeModal('modalAddTx')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="row g-3 mb-3">
-          <div class="col-md-3">
-            <label class="form-label">Referensi</label>
-            <input type="text" name="reference" class="form-control" placeholder="JE-0001">
+
+      <div class="jrn-body">
+        <div class="jrn-grid">
+          <div class="jrn-field">
+            <label class="jrn-label" for="jrnRef"><i class="bi bi-tag"></i> Referensi <span class="req">*</span></label>
+            <input type="text" id="jrnRef" name="reference" class="jrn-input" placeholder="JE-0001">
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Tanggal</label>
-            <input type="date" name="transaction_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          <div class="jrn-field">
+            <label class="jrn-label" for="jrnDate"><i class="bi bi-calendar-event"></i> Tanggal <span class="req">*</span></label>
+            <input type="date" id="jrnDate" name="transaction_date" class="jrn-input" value="<?= date('Y-m-d') ?>" required>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Tipe</label>
-            <select name="type" class="form-select">
+          <div class="jrn-field">
+            <label class="jrn-label" for="jrnType"><i class="bi bi-layers"></i> Tipe <span class="req">*</span></label>
+            <select id="jrnType" name="type" class="jrn-input">
               <option value="journal">Jurnal Umum</option>
               <option value="receipt">Penerimaan</option>
               <option value="payment">Pembayaran</option>
             </select>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Keterangan</label>
-            <input type="text" name="description" class="form-control" placeholder="Keterangan">
+          <div class="jrn-field">
+            <label class="jrn-label" for="jrnDesc"><i class="bi bi-journal-text"></i> Keterangan</label>
+            <textarea id="jrnDesc" name="description" class="jrn-input" rows="3" placeholder="Keterangan"></textarea>
           </div>
         </div>
-        <div class="table-responsive">
-          <table class="data-table" id="txLines" style="table-layout:fixed;">
+
+        <div class="table-responsive jrn-table-wrap">
+          <table class="jrn-table" id="txLines">
+            <colgroup>
+              <col style="width:7%">
+              <col style="width:29%">
+              <col style="width:17%">
+              <col style="width:17%">
+              <col style="width:23%">
+              <col style="width:7%">
+            </colgroup>
             <thead>
               <tr>
-                <th style="width:20%">AKUN</th>
-                <th class="text-right" style="width:20%">DEBIT</th>
-                <th class="text-right" style="width:20%">KREDIT</th>
-                <th style="width:20%">KETERANGAN BARIS</th>
-                <th class="text-right" style="width:10%"></th>
+                <th>#</th>
+                <th>Akun</th>
+                <th>Debit</th>
+                <th>Kredit</th>
+                <th>Keterangan Baris</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               <?php for ($i = 0; $i < 2; $i++): ?>
                 <tr>
+                  <td class="jrn-no"><span><?= $i + 1 ?></span></td>
                   <td>
-                    <select name="line_account_id[]" class="form-select form-select-sm" required>
+                    <select name="line_account_id[]" class="jrn-input" required>
                       <option value="">Pilih akun</option>
                       <?php foreach ($accounts as $a): ?>
                         <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
                       <?php endforeach; ?>
                     </select>
                   </td>
-                  <td class="text-right"><input type="number" name="line_debit[]" class="form-control form-control-sm" step="0.01" min="0" value="0"></td>
-                  <td class="text-right"><input type="number" name="line_credit[]" class="form-control form-control-sm" step="0.01" min="0" value="0"></td>
-                  <td><input type="text" name="line_desc[]" class="form-control form-control-sm" placeholder="Keterangan"></td>
-                  <td class="text-right"><button type="button" class="btn btn-outline btn-sm rem"><i class="bi bi-trash"></i></button></td>
+                  <td><input type="number" name="line_debit[]" class="jrn-input" step="0.01" min="0" value="0"></td>
+                  <td><input type="number" name="line_credit[]" class="jrn-input" step="0.01" min="0" value="0"></td>
+                  <td><input type="text" name="line_desc[]" class="jrn-input" placeholder="Keterangan"></td>
+                  <td class="jrn-act">
+                    <button type="button" class="jrn-btn-del" title="Hapus baris"><i class="bi bi-trash"></i></button>
+                  </td>
                 </tr>
               <?php endfor; ?>
             </tbody>
           </table>
         </div>
-        <div class="text-end mt-2">
-          <button type="button" class="btn btn-outline btn-sm" id="addLine">+ Tambah Baris</button>
-        </div>
+
+        <button type="button" class="jrn-btn-add" id="addLine"><i class="bi bi-plus-lg"></i> Tambah Baris</button>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddTx')">Batal</button>
-        <button class="btn btn-primary">Simpan Jurnal</button>
+
+      <div class="jrn-footer">
+        <svg class="jrn-deco jrn-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="jrn-btn-cancel" onclick="closeModal('modalAddTx')">Batal</button>
+        <button type="submit" class="jrn-btn-save"><i class="bi bi-save"></i> Simpan Jurnal</button>
       </div>
     </form>
   </div>
@@ -391,17 +419,28 @@ document.getElementById('pageActions').innerHTML = `
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(m=>{ m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }); });
-document.getElementById('addLine')?.addEventListener('click', function () {
-  const tbody = document.querySelector('#txLines tbody');
-  const row = tbody.querySelector('tr').cloneNode(true);
-  row.querySelectorAll('input,select').forEach(el => el.value = '');
-  tbody.appendChild(row);
-});
-document.querySelectorAll('.rem').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const tbody = document.querySelector('#txLines tbody');
-    if (tbody.children.length > 1) this.closest('tr').remove();
+
+const jrnTbody = document.querySelector('#txLines tbody');
+function jrnRenumber(){
+  jrnTbody.querySelectorAll('tr').forEach((tr, i) => {
+    const badge = tr.querySelector('.jrn-no span');
+    if (badge) badge.textContent = i + 1;
   });
+}
+document.getElementById('addLine')?.addEventListener('click', function () {
+  const row = jrnTbody.querySelector('tr').cloneNode(true);
+  row.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  row.querySelectorAll('input').forEach(el => { el.value = el.type === 'number' ? '0' : ''; });
+  jrnTbody.appendChild(row);
+  jrnRenumber();
+});
+jrnTbody.addEventListener('click', function (e) {
+  const btn = e.target.closest('.jrn-btn-del');
+  if (!btn) return;
+  if (jrnTbody.querySelectorAll('tr').length > 1) {
+    btn.closest('tr').remove();
+    jrnRenumber();
+  }
 });
 function validateTx(form) {
   let d = 0, k = 0;
