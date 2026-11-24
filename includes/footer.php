@@ -49,47 +49,77 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // =============== AI Chat Widget ===============
   (function () {
+    // Overlay (backdrop + panel) — disembunyikan default, muncul saat FAB diklik
     const overlay = document.createElement('div');
+    overlay.id = 'aiChatOverlay';
     overlay.className = 'ai-chat-overlay';
     overlay.innerHTML = `
-      <button class="ai-fab" id="aiFab" title="Buka Asisten AI" aria-label="Buka Asisten AI">
-        <i class="bi bi-robot"></i>
-        <span class="ai-badge" id="aiBadge" style="display:none;">!</span>
-      </button>
       <div class="ai-chat-panel" id="aiChatPanel" role="dialog" aria-modal="true" aria-label="Asisten AI">
         <div class="ai-chat-header">
-          <div class="ai-chat-title"><i class="bi bi-robot"></i> Asisten AI</div>
-          <span class="ai-chat-status <?= $aiStatusClass ?>" id="aiChatStatus"><?= $aiStatusText ?></span>
+          <div class="ai-header-left">
+            <div class="ai-avatar"><i class="bi bi-robot"></i></div>
+            <div class="ai-header-info">
+              <div class="ai-chat-title">Asisten AI</div>
+              <div class="ai-chat-subtitle">Asisten pintar untuk membantu analisis data akuntansi Anda</div>
+            </div>
+          </div>
+          <div class="ai-header-right">
+            <span class="ai-status-badge"><span class="ai-status-dot"></span> <?= $aiStatusText ?></span>
+            <button class="ai-close-btn" id="aiClose" aria-label="Tutup">&times;</button>
+          </div>
         </div>
+
+        <div class="ai-wave-top"></div>
+
         <div class="ai-chat-body" id="aiChatBody">
+          <div class="ai-date-separator">Hari ini</div>
+
           <div class="ai-empty" id="aiEmpty">
             <i class="bi bi-chat-right-text"></i>
             <div>Mulai bertanya seputar data aplikasi</div>
           </div>
         </div>
+
+        <div class="ai-wave-bottom"></div>
+
         <div class="ai-chat-footer">
-          <input type="text" id="aiInput" placeholder="Ketik pertanyaan Anda..." autocomplete="off">
+          <div class="ai-input-wrapper">
+            <i class="bi bi-star ai-input-icon"></i>
+            <input type="text" id="aiInput" placeholder="Ketik pertanyaan Anda..." autocomplete="off">
+            <button id="aiAttach" title="Lampiran"><i class="bi bi-paperclip"></i></button>
+          </div>
           <button id="aiSend" title="Kirim"><i class="bi bi-send"></i></button>
         </div>
-        <button class="btn-close" style="position:absolute; top:8px; right:8px; z-index:1; background:none; border:none; font-size:1.5rem; color:var(--muted); cursor:pointer;" id="aiClose" aria-label="Tutup">&times;</button>
       </div>
     `;
     document.body.appendChild(overlay);
 
-    const fab = document.getElementById('aiFab');
+    // Tombol melayang (FAB) selalu tampil di kanan bawah
+    const fab = document.createElement('button');
+    fab.id = 'aiFab';
+    fab.className = 'ai-fab';
+    fab.title = 'Buka AI Chat';
+    fab.setAttribute('aria-label', 'Buka AI Chat');
+    fab.type = 'button';
+    fab.innerHTML = `
+      <img src="assets/img/ai-chat-button.png" alt="AI Chat" class="ai-fab-img">
+      <span class="ai-badge" style="display:none;">!</span>
+    `;
+    document.body.appendChild(fab);
+
     const panel = document.getElementById('aiChatPanel');
-    const badge = document.getElementById('aiBadge');
+    const unreadBadge = document.querySelector('.ai-badge');
     const closeBtn = document.getElementById('aiClose');
     const body = document.getElementById('aiChatBody');
     const input = document.getElementById('aiInput');
     const sendBtn = document.getElementById('aiSend');
     const empty = document.getElementById('aiEmpty');
-    const status = document.getElementById('aiChatStatus');
 
     let unread = 0;
+    let lastDateKey = null;
 
     function openChat() { overlay.classList.add('show'); panel.focus(); }
-    function closeChat() { overlay.classList.remove('show'); unread = 0; badge.style.display = 'none'; }
+    function closeChat() { overlay.classList.remove('show'); unread = 0; unreadBadge.style.display = 'none'; }
 
     fab.addEventListener('click', openChat);
     closeBtn.addEventListener('click', closeChat);
@@ -99,21 +129,58 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function scrollBottom() { body.scrollTop = body.scrollHeight; }
 
+    function addDateSeparator() {
+      const now = new Date();
+      const key = now.toDateString();
+      if (key === lastDateKey) return;
+      lastDateKey = key;
+      const div = document.createElement('div');
+      div.className = 'ai-date-separator';
+      div.innerHTML = '<span>Hari ini</span>';
+      body.appendChild(div);
+      scrollBottom();
+    }
+
     function addMessage(text, role, showBadge) {
       const now = new Date();
       const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      addDateSeparator();
       const div = document.createElement('div');
       div.className = 'ai-msg ai-' + role;
+      const isAI = role === 'ai';
+      const avatar = isAI
+        ? '<div class="ai-avatar-msg"><i class="bi bi-robot"></i></div>'
+        : '';
       div.innerHTML = `
+        ${avatar}
         <div class="ai-bubble">${text}</div>
-        <div class="ai-meta">${role === 'user' ? 'Anda' : 'AI'} • ${time}</div>
+        <div class="ai-meta">${isAI ? 'AI' : 'Anda'} • ${time}</div>
       `;
+      if (!isAI) {
+        // user message: move meta to right, bubble already row-reverse
+        div.querySelector('.ai-meta').style.marginLeft = 'auto';
+        div.querySelector('.ai-meta').style.textAlign = 'right';
+      }
       body.appendChild(div);
       if (empty) empty.style.display = 'none';
       scrollBottom();
       if (showBadge && !overlay.classList.contains('show')) {
-        unread++; badge.style.display = 'flex'; badge.textContent = unread;
+        unread++; unreadBadge.style.display = 'flex'; unreadBadge.textContent = unread;
       }
+      return div;
+    }
+
+    function addTyping() {
+      const div = document.createElement('div');
+      div.className = 'ai-msg ai-ai';
+      div.id = 'aiTyping';
+      div.innerHTML = `
+        <div class="ai-avatar-msg"><i class="bi bi-robot"></i></div>
+        <div class="ai-typing"><span></span><span></span><span></span></div>
+      `;
+      body.appendChild(div);
+      if (empty) empty.style.display = 'none';
+      scrollBottom();
       return div;
     }
 
@@ -129,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
       input.value = '';
       setLoading(true);
 
-      const typing = addMessage('...', 'ai');
+      const typing = addTyping();
       try {
         const res = await fetch('api/ai-chat.php', {
           method: 'POST',
@@ -159,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   })();
+  });
 </script>
 </body>
 </html>

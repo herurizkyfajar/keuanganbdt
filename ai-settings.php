@@ -78,7 +78,12 @@ document.getElementById('pageSubtitle').textContent = 'Konfigurasi API asisten A
       <div class="form-grid mt-3">
         <div>
           <label class="form-label">API Key</label>
-          <input type="password" name="api_key" class="form-control" value="<?= htmlspecialchars($ai['api_key'] ?? '') ?>" placeholder="sk-...">
+          <div class="input-with-toggle" style="position:relative; display:inline-flex; align-items:center; width:100%;">
+            <input type="password" name="api_key" class="form-control" id="aiApiKey" value="<?= htmlspecialchars($ai['api_key'] ?? '') ?>" placeholder="sk-...">
+            <button type="button" id="aiToggleApiKey" class="btn-toggle-password" style="position:absolute; right:0.5rem; background:none; border:none; cursor:pointer; padding:0.4rem; font-size:0.9rem; color:var(--muted);" aria-label="Tampilkan/sembunyikan API Key" title="Tampilkan/sembunyikan API Key">
+              <i class="bi bi-eye" id="aiToggleApiKeyIcon"></i>
+            </button>
+          </div>
         </div>
         <div>
           <label class="form-label">Temperature</label>
@@ -98,11 +103,86 @@ document.getElementById('pageSubtitle').textContent = 'Konfigurasi API asisten A
       </div>
 
       <div class="mt-3">
-        <button class="btn btn-primary"><i class="bi bi-save me-1"></i> Simpan Pengaturan AI</button>
+        <button class="btn btn-primary" id="btnSaveAI"><i class="bi bi-save me-1"></i> Simpan Pengaturan AI</button>
+        <button class="btn btn-outline" id="btnTestAI" type="button"><i class="bi bi-link-45deg me-1"></i> Cek Koneksi API</button>
         <a href="dashboard.php" class="btn btn-outline"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
+        <div id="aiTestResult" class="mt-2" style="display:none;"></div>
       </div>
     </form>
   </div>
 </div>
+
+    <script>
+    document.getElementById('btnTestAI').addEventListener('click', async function () {
+      const btn = this;
+      const result = document.getElementById('aiTestResult');
+      const form = btn.closest('form');
+
+      // Ambil nilai dari form
+      const provider = form.querySelector('select[name="provider"]').value;
+      const apiKey = form.querySelector('input[name="api_key"]').value;
+      const baseUrl = form.querySelector('input[name="base_url"]').value;
+      const model = form.querySelector('input[name="model"]').value;
+
+      if (!apiKey) {
+        showResult('API Key belum diisi.', 'danger');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-bootstrap-reboot me-1"></i> Mengecek...';
+      result.style.display = 'none';
+
+      try {
+        const res = await fetch('api/ai-test.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider, api_key: apiKey, base_url: baseUrl, model })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          showResult('&#10003; ' + (data.message || 'Koneksi berhasil.') + (data.reply ? ' <br><small style="color:var(--muted);">Balasan: ' + htmlEscape(data.reply) + '</small>' : ''), 'success');
+        } else {
+          let msg = '&#10007; ' + (data.error || 'Koneksi gagal.');
+          if (data.debug) {
+            msg += ' <br><small style="color:var(--muted);">Debug: ' + htmlEscape(data.debug) + '</small>';
+          }
+          showResult(msg, 'danger');
+        }
+      } catch (err) {
+        showResult('&#10007; Gagal terhubung ke server: ' + err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-link-45deg me-1"></i> Cek Koneksi API';
+      }
+    });
+
+    function showResult(text, type) {
+      const result = document.getElementById('aiTestResult');
+      result.style.display = 'block';
+      result.className = 'alert alert-' + type;
+      result.innerHTML = text;
+    }
+
+    function htmlEscape(str) {
+      return str.replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#039;' }[c];
+      });
+    }
+
+    // Toggle show/hide API Key
+    const apiKeyInput = document.getElementById('aiApiKey');
+    const apiKeyToggle = document.getElementById('aiToggleApiKey');
+    const apiKeyIcon = document.getElementById('aiToggleApiKeyIcon');
+    if (apiKeyInput && apiKeyToggle && apiKeyIcon) {
+      apiKeyToggle.addEventListener('click', function () {
+        const show = apiKeyInput.type === 'password';
+        apiKeyInput.type = show ? 'text' : 'password';
+        apiKeyIcon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        apiKeyToggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+      });
+    }
+    </script>
 
 <?php require_once 'includes/footer.php'; ?>

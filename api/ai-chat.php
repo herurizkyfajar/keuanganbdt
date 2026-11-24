@@ -140,12 +140,19 @@ function buildDataContext($pdo, $businessId): string {
  * Panggil API AI yang kompatibel OpenAI (chat/completions).
  */
 function callAiApi(string $baseUrl, string $apiKey, string $model, float $temperature, int $maxTokens, array $messages): string {
-    $url = $baseUrl ? $baseUrl . '/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+    $suffix = '/chat/completions';
+    if ($baseUrl) {
+        $baseUrl = rtrim($baseUrl, '/');
+        $url = substr($baseUrl, -strlen($suffix)) === $suffix ? $baseUrl : $baseUrl . $suffix;
+    } else {
+        $url = 'https://api.openai.com/v1/chat/completions';
+    }
     $payload = json_encode([
         'model' => $model,
         'messages' => $messages,
         'temperature' => $temperature,
         'max_tokens' => $maxTokens,
+        'stream' => false,
     ]);
 
     $ch = curl_init($url);
@@ -165,9 +172,14 @@ function callAiApi(string $baseUrl, string $apiKey, string $model, float $temper
         return "Gagal menghubungi API AI.";
     }
     $data = json_decode($response, true);
-    if ($httpCode >= 400 || empty($data['choices'][0]['message']['content'])) {
+    $choice = $data['choices'][0] ?? null;
+    $content = $choice['message']['content'] ?? null;
+    if ($content === null || $content === '') {
+        $content = $choice['message']['reasoning_content'] ?? null;
+    }
+    if ($httpCode >= 400 || empty($content)) {
         $err = $data['error']['message'] ?? 'Respons API tidak valid';
         return "Maaf, AI menanggapi dengan kesalahan: " . htmlspecialchars($err);
     }
-    return trim($data['choices'][0]['message']['content']);
+    return trim($content);
 }
