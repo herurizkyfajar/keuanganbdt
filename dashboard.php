@@ -244,7 +244,7 @@ document.getElementById('pageActions').innerHTML = `
   <div class="stat-card">
     <span class="stat-icon bg-primary"><i class="bi bi-coin"></i></span>
     <div class="stat-main">
-      <div class="stat-label">Laba (Rugi) Bersih</div>
+      <div class="stat-label">Net profit (loss)</div>
       <div class="stat-value"><?= rp($netProfit) ?></div>
     </div>
     <div class="stat-meta">
