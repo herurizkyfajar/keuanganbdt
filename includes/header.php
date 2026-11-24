@@ -75,15 +75,11 @@ ob_start();
   <!-- Sidebar (full height, no separate topbar) -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon"><i class="bi bi-building"></i></span>
+      <span class="brand-icon"><i class="bi bi-calculator"></i></span>
       <div class="brand-info">
         <div class="brand-name"><?= htmlspecialchars($businessName) ?></div>
-        <div class="brand-currency"><?= htmlspecialchars($businessCurrency) ?></div>
+        <div class="brand-currency">Aplikasi Akuntansi Bisnis</div>
       </div>
-    </div>
-
-    <div class="sidebar-search">
-      <input type="text" placeholder="Cari modul...">
     </div>
 
     <nav>
@@ -220,19 +216,47 @@ ob_start();
   <!-- Main Content -->
   <main class="main">
     <div class="main-inner">
-      <!-- Breadcrumb / company pill -->
+      <!-- Topbar: hamburger, search, notification, user profile -->
       <?php if (!$isLoginPage): ?>
+      <nav class="topbar">
+        <button class="topbar-toggle" id="mobileMenuToggle" title="Menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="topbar-search">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Cari modul, transaksi, atau laporan...">
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-notif" title="Notifikasi" aria-label="Notifikasi">
+            <i class="bi bi-bell"></i>
+            <span class="topbar-notif-dot"></span>
+          </button>
+          <div class="topbar-user dropdown">
+            <button class="topbar-user-btn" id="userDropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="topbar-user-avatar"><i class="bi bi-person-fill"></i></span>
+              <div class="topbar-user-info">
+                <div class="topbar-user-name"><?= htmlspecialchars($userName) ?></div>
+                <div class="topbar-user-role"><?= htmlspecialchars($userRole) ?></div>
+              </div>
+              <i class="bi bi-chevron-down topbar-user-caret" style="margin-left:0.35rem;"></i>
+            </button>
+            <ul class="dropdown-menu" id="userDropdownMenu">
+              <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person me-2"></i>Profil</a></li>
+              <li><a class="dropdown-item" href="users.php"><i class="bi bi-people me-2"></i>Kelola Pengguna Admin</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Breadcrumb / company pill -->
       <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
         <span style="background:#fff; border:1px solid var(--border); border-radius:2rem; padding:0.35rem 0.9rem; font-size:0.82rem; color:var(--muted); font-weight:600; box-shadow:var(--shadow);">
-          <i class="bi bi-building me-1" style="font-size:0.75rem;"></i>
+          <i class="bi bi-house-fill me-1" style="font-size:0.75rem;"></i>
           <?= htmlspecialchars($businessName) ?>
         </span>
       </div>
-
-      <!-- Mobile hamburger menu -->
-      <button class="btn btn-outline btn-sm mobile-menu-toggle" id="mobileMenuToggle">
-        <i class="bi bi-list"></i> Menu
-      </button>
 
       <?php endif; ?>
 

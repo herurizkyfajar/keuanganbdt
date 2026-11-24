@@ -71,4 +71,17 @@ document.addEventListener('DOMContentLoaded', function () {
       logoutLink.addEventListener('click', closeSidebar);
     }
   }
+
+  // =============== User Dropdown ===============
+  const userDropdownBtn = document.getElementById('userDropdown');
+  const userDropdownMenu = document.getElementById('userDropdownMenu');
+  if (userDropdownBtn && userDropdownMenu) {
+    userDropdownBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      userDropdownMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', function () {
+      userDropdownMenu.classList.remove('show');
+    });
+  }
 });
