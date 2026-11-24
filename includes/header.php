@@ -230,7 +230,7 @@ ob_start();
       </div>
 
       <!-- Mobile hamburger menu -->
-      <button class="btn btn-outline btn-sm mobile-menu-toggle" id="mobileMenuToggle" style="display:none;">
+      <button class="btn btn-outline btn-sm mobile-menu-toggle" id="mobileMenuToggle">
         <i class="bi bi-list"></i> Menu
       </button>
 
