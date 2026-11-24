@@ -81,47 +81,60 @@ document.getElementById('pageActions').innerHTML = `
 </div>
 
 <div class="modal-overlay" id="modalAddItem">
-  <div class="modal" style="max-width:560px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
       <input type="hidden" name="action" value="add_item">
-      <div class="modal-header">
-        <div class="modal-title">Tambah Barang / Jasa</div>
-        <button class="modal-close" onclick="closeModal('modalAddItem')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-box"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Tambah Barang / Jasa</div>
+          <div class="mdlg-header-sub">Data item penjualan dan pembelian</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddItem')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div>
-            <label class="form-label">Kode Item</label>
-            <input type="text" name="code" class="form-control" placeholder="ITEM-001">
+      <div class="mdlg-body">
+        <div class="mdlg-grid">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemCode"><i class="bi bi-tag"></i> Kode Item</label>
+            <input type="text" id="itemCode" name="code" class="mdlg-input" placeholder="ITEM-001">
           </div>
-          <div class="form-col-2">
-            <label class="form-label">Nama Item</label>
-            <input type="text" name="name" class="form-control" placeholder="Contoh: Laptop ASUS" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemName"><i class="bi bi-fonts"></i> Nama Item <span class="req">*</span></label>
+            <input type="text" id="itemName" name="name" class="mdlg-input" placeholder="Contoh: Laptop ASUS" required>
           </div>
-          <div>
-            <label class="form-label">Tipe</label>
-            <select name="type" class="form-select">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemType"><i class="bi bi-layers"></i> Tipe</label>
+            <select id="itemType" name="type" class="mdlg-input">
               <option value="service">Jasa</option>
               <option value="product">Produk</option>
             </select>
           </div>
-          <div>
-            <label class="form-label">Deskripsi</label>
-            <input type="text" name="description" class="form-control" placeholder="Deskripsi singkat">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemDesc"><i class="bi bi-journal-text"></i> Deskripsi</label>
+            <input type="text" id="itemDesc" name="description" class="mdlg-input" placeholder="Deskripsi singkat">
           </div>
-          <div>
-            <label class="form-label">Harga Jual</label>
-            <input type="number" name="sales_price" class="form-control" step="0.01" min="0" value="0">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemSalesPrice"><i class="bi bi-currency-dollar"></i> Harga Jual</label>
+            <input type="number" id="itemSalesPrice" name="sales_price" class="mdlg-input" step="0.01" min="0" value="0">
           </div>
-          <div>
-            <label class="form-label">Harga Beli</label>
-            <input type="number" name="purchase_price" class="form-control" step="0.01" min="0" value="0">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="itemPurchasePrice"><i class="bi bi-currency-exchange"></i> Harga Beli</label>
+            <input type="number" id="itemPurchasePrice" name="purchase_price" class="mdlg-input" step="0.01" min="0" value="0">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddItem')">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddItem')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan</button>
       </div>
     </form>
   </div>

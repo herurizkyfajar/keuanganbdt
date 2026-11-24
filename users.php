@@ -145,46 +145,59 @@ document.getElementById('pageSubtitle').textContent = 'Kelola data akun admin da
 
 <!-- Modal Tambah / Edit Pengguna -->
 <div class="modal-overlay" id="modalAddUser">
-  <div class="modal" style="max-width:500px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
       <input type="hidden" name="action" value="add_user">
       <input type="hidden" id="editUserId" name="id">
-      <div class="modal-header">
-        <div class="modal-title" id="modalUserTitle">Tambah Pengguna</div>
-        <button class="modal-close" onclick="closeModal('modalAddUser')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-person-badge"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title" id="modalUserTitle">Tambah Pengguna</div>
+          <div class="mdlg-header-sub">Kelola akses pengguna sistem</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddUser')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div>
-            <label class="form-label">Nama Lengkap</label>
-            <input type="text" name="name" class="form-control" required>
+      <div class="mdlg-body">
+        <div class="mdlg-grid">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="userName"><i class="bi bi-person"></i> Nama Lengkap <span class="req">*</span></label>
+            <input type="text" id="userName" name="name" class="mdlg-input" required>
           </div>
-          <div>
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="userEmail"><i class="bi bi-envelope"></i> Email <span class="req">*</span></label>
+            <input type="email" id="userEmail" name="email" class="mdlg-input" required>
           </div>
-          <div class="form-col-2">
-            <label class="form-label">Role</label>
-            <select name="role" class="form-select">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="userRole"><i class="bi bi-person-badge"></i> Role</label>
+            <select id="userRole" name="role" class="mdlg-input">
               <option value="admin">Admin</option>
               <option value="user">User</option>
             </select>
           </div>
-          <div>
-            <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="userPassword"><i class="bi bi-key"></i> Password <span class="req">*</span></label>
+            <input type="password" id="userPassword" name="password" class="mdlg-input" required>
           </div>
-          <div class="form-col-2">
-            <label class="form-label" style="display:flex; align-items:center; gap:0.5rem;">
-              <input type="checkbox" name="is_active" value="1" checked>
-              Aktif
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="userIsActive" style="margin-bottom:0;">
+              <input type="checkbox" id="userIsActive" name="is_active" value="1" checked>
+              Akun aktif
             </label>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddUser')">Batal</button>
-        <button type="submit" class="btn btn-primary">Simpan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddUser')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan</button>
       </div>
     </form>
   </div>
@@ -214,7 +227,7 @@ function editUser(data) {
 }
 
 // Reset form saat membuka modal tambah baru
-document.querySelector('#modalAddUser .modal-close').addEventListener('click', function() {
+document.querySelector('#modalAddUser .mdlg-close').addEventListener('click', function() {
   const form = document.querySelector('#modalAddUser form');
   const actionInput = document.querySelector('#modalAddUser input[name="action"]');
   actionInput.value = 'add_user';

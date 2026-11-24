@@ -85,40 +85,53 @@ document.getElementById('pageActions').innerHTML = `
 </div>
 
 <div class="modal-overlay" id="modalAddCustomer">
-  <div class="modal" style="max-width:560px;">
+  <div class="modal modal-modern" style="max-width:560px;">
     <form method="POST" action="">
       <input type="hidden" name="action" value="add_customer">
-      <div class="modal-header">
-        <div class="modal-title">Tambah Pelanggan</div>
-        <button class="modal-close" onclick="closeModal('modalAddCustomer')">&times;</button>
+      <div class="mdlg-header">
+        <svg class="mdlg-deco mdlg-deco-top" viewBox="0 0 600 140" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M170,140 C300,80 430,30 600,4" stroke="rgba(255,255,255,0.9)" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <path d="M235,140 C360,92 470,48 600,30" stroke="#8dc63f" stroke-width="17" fill="none" stroke-linecap="round"/>
+          <path d="M305,140 C425,110 515,74 600,62" stroke="rgba(255,255,255,0.45)" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="mdlg-header-icon"><i class="bi bi-person"></i></div>
+        <div class="mdlg-header-text">
+          <div class="mdlg-header-title">Tambah Pelanggan</div>
+          <div class="mdlg-header-sub">Data pelanggan perusahaan</div>
+        </div>
+        <button type="button" class="mdlg-close" onclick="closeModal('modalAddCustomer')" aria-label="Tutup">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="form-col-2">
-            <label class="form-label">Nama Pelanggan</label>
-            <input type="text" name="name" class="form-control" placeholder="Contoh: PT Pelanggan Abadi" required>
+      <div class="mdlg-body">
+        <div class="mdlg-grid">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="custName"><i class="bi bi-person"></i> Nama Pelanggan <span class="req">*</span></label>
+            <input type="text" id="custName" name="name" class="mdlg-input" placeholder="Contoh: PT Pelanggan Abadi" required>
           </div>
-          <div>
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" placeholder="pelanggan@email.com">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="custEmail"><i class="bi bi-envelope"></i> Email</label>
+            <input type="email" id="custEmail" name="email" class="mdlg-input" placeholder="pelanggan@email.com">
           </div>
-          <div>
-            <label class="form-label">Telepon</label>
-            <input type="text" name="phone" class="form-control" placeholder="08123456789">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="custPhone"><i class="bi bi-telephone"></i> Telepon</label>
+            <input type="text" id="custPhone" name="phone" class="mdlg-input" placeholder="08123456789">
           </div>
-          <div class="form-col-2">
-            <label class="form-label">Alamat</label>
-            <textarea name="address" class="form-control" rows="2" placeholder="Alamat lengkap"></textarea>
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="custAddress"><i class="bi bi-house"></i> Alamat</label>
+            <textarea id="custAddress" name="address" class="mdlg-input" rows="2" placeholder="Alamat lengkap"></textarea>
           </div>
-          <div>
-            <label class="form-label">NPWP</label>
-            <input type="text" name="tax_number" class="form-control" placeholder="01.234.567.8-901.000">
+          <div class="mdlg-field">
+            <label class="mdlg-label" for="custNpwp"><i class="bi bi-hash"></i> NPWP</label>
+            <input type="text" id="custNpwp" name="tax_number" class="mdlg-input" placeholder="01.234.567.8-901.000">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('modalAddCustomer')">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+      <div class="mdlg-footer">
+        <svg class="mdlg-deco mdlg-deco-bottom" viewBox="0 0 420 90" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,72 C95,42 215,36 335,56 L420,68 L420,90 L0,90 Z" fill="rgba(141,198,63,0.18)"/>
+          <path d="M0,84 C115,64 255,62 420,80 L420,90 L0,90 Z" fill="rgba(33,110,215,0.10)"/>
+        </svg>
+        <button type="button" class="mdlg-btn-cancel" onclick="closeModal('modalAddCustomer')">Batal</button>
+        <button type="submit" class="mdlg-btn-save"><i class="bi bi-save"></i> Simpan</button>
       </div>
     </form>
   </div>
