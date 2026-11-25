@@ -1,6 +1,5 @@
 <?php
 // ai-settings.php — Pengaturan API Asisten AI
-ob_start();
 require_once 'includes/header.php';
 $businessId = $_SESSION['business_id'];
 
@@ -79,7 +78,7 @@ document.getElementById('pageSubtitle').textContent = 'Konfigurasi API asisten A
         <div>
           <label class="form-label">API Key</label>
           <div class="input-with-toggle" style="position:relative; display:inline-flex; align-items:center; width:100%;">
-            <input type="password" name="api_key" class="form-control" id="aiApiKey" value="<?= htmlspecialchars($ai['api_key'] ?? '') ?>" placeholder="sk-...">
+            <input type="password" name="api_key" class="form-control" id="aiApiKey" value="<?= htmlspecialchars($ai['api_key'] ?? '') ?>" placeholder="sk-..." style="padding-right:2.6rem;">
             <button type="button" id="aiToggleApiKey" class="btn-toggle-password" style="position:absolute; right:0.5rem; background:none; border:none; cursor:pointer; padding:0.4rem; font-size:0.9rem; color:var(--muted);" aria-label="Tampilkan/sembunyikan API Key" title="Tampilkan/sembunyikan API Key">
               <i class="bi bi-eye" id="aiToggleApiKeyIcon"></i>
             </button>

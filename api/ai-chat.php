@@ -97,70 +97,427 @@ echo json_encode(['reply' => $reply, 'session_id' => $sessionId]);
 exit;
 
 /**
- * Kumpulkan rangkuman data bisnis sebagai konteks AI.
+ * Kumpulkan SEMUA data bisnis sebagai konteks AI.
+ * Mengambil seluruh data dari semua tabel agar AI dapat menjawab
+ * pertanyaan apa pun tentang data aplikasi.
  */
 function buildDataContext($pdo, $businessId): string {
     $lines = [];
 
-    $stmt = $pdo->prepare("SELECT name, currency, tax_number FROM businesses WHERE id = ?");
+    // ============================================================
+    // 1. PERUSAHAAN
+    // ============================================================
+    $stmt = $pdo->prepare("SELECT name, address, phone, email, tax_number, currency, financial_year_start FROM businesses WHERE id = ?");
     $stmt->execute([$businessId]);
     $biz = $stmt->fetch();
-    $lines[] = "- Perusahaan: " . htmlspecialchars($biz['name'] ?? '-') . " | Mata uang: " . ($biz['currency'] ?? 'IDR');
+    $lines[] = "PERUSAHAAN:";
+    $lines[] = "  - Nama: " . htmlspecialchars($biz['name'] ?? '-');
+    $lines[] = "  - Alamat: " . htmlspecialchars($biz['address'] ?? '-');
+    $lines[] = "  - Telepon: " . htmlspecialchars($biz['phone'] ?? '-');
+    $lines[] = "  - Email: " . htmlspecialchars($biz['email'] ?? '-');
+    $lines[] = "  - NPWP: " . htmlspecialchars($biz['tax_number'] ?? '-');
+    $lines[] = "  - Mata uang: " . htmlspecialchars($biz['currency'] ?? 'IDR');
+    $lines[] = "  - Awal tahun buku: " . htmlspecialchars($biz['financial_year_start'] ?? '-');
 
-    // Saldo per tipe akun
+    // ============================================================
+    // 2. CHART OF ACCOUNTS (semua akun dengan saldo)
+    // ============================================================
+    $lines[] = "\nDAFTAR AKUN (Chart of Accounts):";
     $stmt = $pdo->prepare("
-      SELECT a.type, COUNT(*) as cnt,
+      SELECT a.code, a.name, a.type, a.description, a.is_active,
              COALESCE(SUM(CASE WHEN a.type IN ('asset','bank','expense') THEN l.debit - l.credit ELSE l.credit - l.debit END),0) as balance
       FROM accounts a
       LEFT JOIN transaction_lines l ON l.account_id = a.id
-      WHERE a.business_id = ? AND a.is_active = 1
-      GROUP BY a.type
+      WHERE a.business_id = ?
+      GROUP BY a.id, a.code, a.name, a.type, a.description, a.is_active
+      ORDER BY a.code ASC
     ");
     $stmt->execute([$businessId]);
+    $acctCount = 0;
     while ($row = $stmt->fetch()) {
-        $lines[] = "- Akun (" . $row['type'] . "): " . $row['cnt'] . " akun, saldo: " . number_format($row['balance'], 0, ',', '.');
+        $status = $row['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        $lines[] = sprintf(
+            "  - %s | %s | %s | %s | saldo: %s",
+            htmlspecialchars($row['code'] ?? '-'),
+            htmlspecialchars($row['name'] ?? '-'),
+            htmlspecialchars($row['type'] ?? '-'),
+            $status,
+            number_format($row['balance'], 0, ',', '.')
+        );
+        $acctCount++;
+    }
+    $lines[] = "  Total akun: " . $acctCount;
+
+    // ============================================================
+    // 3. REKENING BANK
+    // ============================================================
+    $lines[] = "\nREKENING BANK:";
+    $stmt = $pdo->prepare("
+      SELECT account_name, bank_name, account_number, currency, opening_balance, opening_date, is_active
+      FROM bank_accounts WHERE business_id = ?
+    ");
+    $stmt->execute([$businessId]);
+    $bankCount = 0;
+    while ($row = $stmt->fetch()) {
+        $status = $row['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        $lines[] = sprintf(
+            "  - %s | %s | %s | %s | saldo pembuka: %s | %s",
+            htmlspecialchars($row['account_name'] ?? '-'),
+            htmlspecialchars($row['bank_name'] ?? '-'),
+            htmlspecialchars($row['account_number'] ?? '-'),
+            htmlspecialchars($row['currency'] ?? 'IDR'),
+            number_format($row['opening_balance'], 0, ',', '.'),
+            $status
+        );
+        $bankCount++;
+    }
+    if ($bankCount === 0) {
+        $lines[] = "  (tidak ada rekening bank)";
+    } else {
+        $lines[] = "  Total rekening bank: " . $bankCount;
     }
 
-    // Transaksi 30 hari terakhir
+    // ============================================================
+    // 4. PELANGGAN
+    // ============================================================
+    $lines[] = "\nPELANGGAN:";
     $stmt = $pdo->prepare("
-      SELECT COUNT(*) as cnt
+      SELECT name, email, phone, address, tax_number, credit_limit, balance, is_active
+      FROM customers WHERE business_id = ?
+    ");
+    $stmt->execute([$businessId]);
+    $custCount = 0;
+    while ($row = $stmt->fetch()) {
+        $status = $row['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        $lines[] = sprintf(
+            "  - %s | email: %s | telp: %s | NPWP: %s | saldo: %s | limite kredit: %s | %s",
+            htmlspecialchars($row['name'] ?? '-'),
+            htmlspecialchars($row['email'] ?? '-'),
+            htmlspecialchars($row['phone'] ?? '-'),
+            htmlspecialchars($row['tax_number'] ?? '-'),
+            number_format($row['balance'], 0, ',', '.'),
+            number_format($row['credit_limit'], 0, ',', '.'),
+            $status
+        );
+        $custCount++;
+    }
+    if ($custCount === 0) {
+        $lines[] = "  (tidak ada pelanggan)";
+    } else {
+        $lines[] = "  Total pelanggan: " . $custCount;
+    }
+
+    // ============================================================
+    // 5. PEMASOK
+    // ============================================================
+    $lines[] = "\nPEMASOK:";
+    $stmt = $pdo->prepare("
+      SELECT name, email, phone, address, tax_number, balance, is_active
+      FROM suppliers WHERE business_id = ?
+    ");
+    $stmt->execute([$businessId]);
+    $suppCount = 0;
+    while ($row = $stmt->fetch()) {
+        $status = $row['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        $lines[] = sprintf(
+            "  - %s | email: %s | telp: %s | NPWP: %s | saldo: %s | %s",
+            htmlspecialchars($row['name'] ?? '-'),
+            htmlspecialchars($row['email'] ?? '-'),
+            htmlspecialchars($row['phone'] ?? '-'),
+            htmlspecialchars($row['tax_number'] ?? '-'),
+            number_format($row['balance'], 0, ',', '.'),
+            $status
+        );
+        $suppCount++;
+    }
+    if ($suppCount === 0) {
+        $lines[] = "  (tidak ada pemasok)";
+    } else {
+        $lines[] = "  Total pemasok: " . $suppCount;
+    }
+
+    // ============================================================
+    // 6. BARANG & JASA (Items)
+    // ============================================================
+    $lines[] = "\nBARANG & JASA:";
+    $stmt = $pdo->prepare("
+      SELECT code, name, description, type, sales_price, purchase_price, is_active
+      FROM items WHERE business_id = ?
+    ");
+    $stmt->execute([$businessId]);
+    $itemCount = 0;
+    while ($row = $stmt->fetch()) {
+        $status = $row['is_active'] ? 'Aktif' : 'Tidak Aktif';
+        $lines[] = sprintf(
+            "  - %s | %s | %s | harga jual: %s | harga beli: %s | %s",
+            htmlspecialchars($row['code'] ?? '-'),
+            htmlspecialchars($row['name'] ?? '-'),
+            htmlspecialchars($row['type'] ?? '-'),
+            number_format($row['sales_price'], 0, ',', '.'),
+            number_format($row['purchase_price'], 0, ',', '.'),
+            $status
+        );
+        $itemCount++;
+    }
+    if ($itemCount === 0) {
+        $lines[] = "  (tidak ada barang/jasa)";
+    } else {
+        $lines[] = "  Total barang/jasa: " . $itemCount;
+    }
+
+    // ============================================================
+    // 7. TRANSAKSI (semua)
+    // ============================================================
+    $lines[] = "\nTRANSAKSI (semua):";
+    $stmt = $pdo->prepare("
+      SELECT t.id, t.reference, t.description, t.transaction_date, t.type, t.created_at
       FROM transactions t
-      WHERE t.business_id = ? AND t.transaction_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+      WHERE t.business_id = ?
+      ORDER BY t.transaction_date DESC, t.id DESC
     ");
     $stmt->execute([$businessId]);
-    $tx = $stmt->fetch();
-    $lines[] = "- Transaksi 30 hari terakhir: " . $tx['cnt'] . " transaksi";
-
-    // Faktur penjualan per status
-    $stmt = $pdo->prepare("
-      SELECT status, COUNT(*) as cnt, COALESCE(SUM(total),0) as total
-      FROM sales_invoices WHERE business_id = ? GROUP BY status
-    ");
-    $stmt->execute([$businessId]);
-    $invParts = [];
+    $txCount = 0;
     while ($row = $stmt->fetch()) {
-        $invParts[] = $row['status'] . ": " . $row['cnt'] . " (" . number_format($row['total'], 0, ',', '.') . ")";
+        $lines[] = sprintf(
+            "  - %s | %s | %s | %s | %s | id:%d",
+            htmlspecialchars($row['transaction_date'] ?? '-'),
+            htmlspecialchars($row['reference'] ?? '-'),
+            htmlspecialchars($row['description'] ?? '-'),
+            htmlspecialchars($row['type'] ?? '-'),
+            htmlspecialchars($row['created_at'] ?? '-'),
+            (int)$row['id']
+        );
+        $txCount++;
     }
-    $lines[] = "- Faktur penjualan: " . (empty($invParts) ? '-' : implode('; ', $invParts));
+    if ($txCount === 0) {
+        $lines[] = "  (tidak ada transaksi)";
+    } else {
+        $lines[] = "  Total transaksi: " . $txCount;
+    }
 
-    // Faktur pembelian per status
+    // ============================================================
+    // 8. TRANSACTION LINES (semua baris jurnal)
+    // ============================================================
+    $lines[] = "\nBARIS JURNAL (semua):";
     $stmt = $pdo->prepare("
-      SELECT status, COUNT(*) as cnt, COALESCE(SUM(total),0) as total
-      FROM purchase_invoices WHERE business_id = ? GROUP BY status
+      SELECT l.id, l.transaction_id, l.account_id, a.code as account_code, a.name as account_name,
+             l.description, l.debit, l.credit
+      FROM transaction_lines l
+      LEFT JOIN accounts a ON l.account_id = a.id
+      WHERE l.transaction_id IN (SELECT id FROM transactions WHERE business_id = ?)
+      ORDER BY l.id ASC
     ");
     $stmt->execute([$businessId]);
-    $purParts = [];
+    $lineCount = 0;
     while ($row = $stmt->fetch()) {
-        $purParts[] = $row['status'] . ": " . $row['cnt'] . " (" . number_format($row['total'], 0, ',', '.') . ")";
+        $lines[] = sprintf(
+            "  - id:%d | transaksi:%d | akun:%s (%s) | %s | debit: %s | kredit: %s",
+            (int)$row['id'],
+            (int)$row['transaction_id'],
+            htmlspecialchars($row['account_code'] ?? '-'),
+            htmlspecialchars($row['account_name'] ?? '-'),
+            htmlspecialchars($row['description'] ?? '-'),
+            number_format($row['debit'], 0, ',', '.'),
+            number_format($row['credit'], 0, ',', '.')
+        );
+        $lineCount++;
     }
-    $lines[] = "- Faktur pembelian: " . (empty($purParts) ? '-' : implode('; ', $purParts));
+    if ($lineCount === 0) {
+        $lines[] = "  (tidak ada baris jurnal)";
+    } else {
+        $lines[] = "  Total baris jurnal: " . $lineCount;
+    }
 
-    // Jumlah data master
-    foreach (['customers', 'suppliers', 'items', 'bank_accounts'] as $tbl) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM $tbl WHERE business_id = ?");
-        $stmt->execute([$businessId]);
-        $c = $stmt->fetch();
-        $lines[] = "- $tbl: " . $c['cnt'] . " data";
+    // ============================================================
+    // 9. FAKTUR PENJUALAN (semua)
+    // ============================================================
+    $lines[] = "\nFAKTUR PENJUALAN (semua):";
+    $stmt = $pdo->prepare("
+      SELECT si.id, si.invoice_number, si.customer_id, c.name as customer_name,
+             si.invoice_date, si.due_date, si.status, si.subtotal, si.tax_amount, si.total, si.notes
+      FROM sales_invoices si
+      LEFT JOIN customers c ON si.customer_id = c.id
+      WHERE si.business_id = ?
+      ORDER BY si.invoice_date DESC, si.id DESC
+    ");
+    $stmt->execute([$businessId]);
+    $invCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - %s | %s | %s | %s | %s | subtotal: %s | pajak: %s | total: %s | catatan: %s",
+            htmlspecialchars($row['invoice_number'] ?? '-'),
+            htmlspecialchars($row['customer_name'] ?? '-'),
+            htmlspecialchars($row['invoice_date'] ?? '-'),
+            htmlspecialchars($row['due_date'] ?? '-'),
+            htmlspecialchars($row['status'] ?? '-'),
+            number_format($row['subtotal'], 0, ',', '.'),
+            number_format($row['tax_amount'], 0, ',', '.'),
+            number_format($row['total'], 0, ',', '.'),
+            htmlspecialchars($row['notes'] ?? '-')
+        );
+        $invCount++;
+    }
+    if ($invCount === 0) {
+        $lines[] = "  (tidak ada faktur penjualan)";
+    } else {
+        $lines[] = "  Total faktur penjualan: " . $invCount;
+    }
+
+    // ============================================================
+    // 10. SALES INVOICE LINES (semua)
+    // ============================================================
+    $lines[] = "\nBARIS FAKTUR PENJUALAN (semua):";
+    $stmt = $pdo->prepare("
+      SELECT sil.id, sil.sales_invoice_id, sil.item_id, sil.description,
+             sil.quantity, sil.unit_price, sil.amount, sil.account_id
+      FROM sales_invoice_lines sil
+      WHERE sil.sales_invoice_id IN (SELECT id FROM sales_invoices WHERE business_id = ?)
+    ");
+    $stmt->execute([$businessId]);
+    $silCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - id:%d | faktur:%d | item:%s | %s | qty: %s | harga satuan: %s | jumlah: %s | akun:%s",
+            (int)$row['id'],
+            (int)$row['sales_invoice_id'],
+            htmlspecialchars($row['item_id'] ?? '-'),
+            htmlspecialchars($row['description'] ?? '-'),
+            number_format($row['quantity'], 0, ',', '.'),
+            number_format($row['unit_price'], 0, ',', '.'),
+            number_format($row['amount'], 0, ',', '.'),
+            htmlspecialchars($row['account_id'] ?? '-')
+        );
+        $silCount++;
+    }
+    if ($silCount === 0) {
+        $lines[] = "  (tidak ada baris faktur penjualan)";
+    } else {
+        $lines[] = "  Total baris faktur penjualan: " . $silCount;
+    }
+
+    // ============================================================
+    // 11. FAKTUR PEMBELIAN (semua)
+    // ============================================================
+    $lines[] = "\nFAKTUR PEMBELIAN (semua):";
+    $stmt = $pdo->prepare("
+      SELECT pi.id, pi.invoice_number, pi.supplier_id, s.name as supplier_name,
+             pi.invoice_date, pi.due_date, pi.status, pi.subtotal, pi.tax_amount, pi.total, pi.notes
+      FROM purchase_invoices pi
+      LEFT JOIN suppliers s ON pi.supplier_id = s.id
+      WHERE pi.business_id = ?
+      ORDER BY pi.invoice_date DESC, pi.id DESC
+    ");
+    $stmt->execute([$businessId]);
+    $purCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - %s | %s | %s | %s | %s | subtotal: %s | pajak: %s | total: %s | catatan: %s",
+            htmlspecialchars($row['invoice_number'] ?? '-'),
+            htmlspecialchars($row['supplier_name'] ?? '-'),
+            htmlspecialchars($row['invoice_date'] ?? '-'),
+            htmlspecialchars($row['due_date'] ?? '-'),
+            htmlspecialchars($row['status'] ?? '-'),
+            number_format($row['subtotal'], 0, ',', '.'),
+            number_format($row['tax_amount'], 0, ',', '.'),
+            number_format($row['total'], 0, ',', '.'),
+            htmlspecialchars($row['notes'] ?? '-')
+        );
+        $purCount++;
+    }
+    if ($purCount === 0) {
+        $lines[] = "  (tidak ada faktur pembelian)";
+    } else {
+        $lines[] = "  Total faktur pembelian: " . $purCount;
+    }
+
+    // ============================================================
+    // 12. PURCHASE INVOICE LINES (semua)
+    // ============================================================
+    $lines[] = "\nBARIS FAKTUR PEMBELIAN (semua):";
+    $stmt = $pdo->prepare("
+      SELECT pil.id, pil.purchase_invoice_id, pil.item_id, pil.description,
+             pil.quantity, pil.unit_price, pil.amount, pil.account_id
+      FROM purchase_invoice_lines pil
+      WHERE pil.purchase_invoice_id IN (SELECT id FROM purchase_invoices WHERE business_id = ?)
+    ");
+    $stmt->execute([$businessId]);
+    $pilCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - id:%d | faktur:%d | item:%s | %s | qty: %s | harga satuan: %s | jumlah: %s | akun:%s",
+            (int)$row['id'],
+            (int)$row['purchase_invoice_id'],
+            htmlspecialchars($row['item_id'] ?? '-'),
+            htmlspecialchars($row['description'] ?? '-'),
+            number_format($row['quantity'], 0, ',', '.'),
+            number_format($row['unit_price'], 0, ',', '.'),
+            number_format($row['amount'], 0, ',', '.'),
+            htmlspecialchars($row['account_id'] ?? '-')
+        );
+        $pilCount++;
+    }
+    if ($pilCount === 0) {
+        $lines[] = "  (tidak ada baris faktur pembelian)";
+    } else {
+        $lines[] = "  Total baris faktur pembelian: " . $pilCount;
+    }
+
+    // ============================================================
+    // 13. EXPENSE CLAIMS (semua klaim biaya)
+    // ============================================================
+    $lines[] = "\nKLAIM BIAYA (semua):";
+    $stmt = $pdo->prepare("
+      SELECT ec.id, ec.employee_name, ec.claim_date, ec.status, ec.total, ec.notes
+      FROM expense_claims ec
+      WHERE ec.business_id = ?
+      ORDER BY ec.claim_date DESC, ec.id DESC
+    ");
+    $stmt->execute([$businessId]);
+    $claimCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - id:%d | %s | %s | %s | total: %s | catatan: %s",
+            (int)$row['id'],
+            htmlspecialchars($row['employee_name'] ?? '-'),
+            htmlspecialchars($row['claim_date'] ?? '-'),
+            htmlspecialchars($row['status'] ?? '-'),
+            number_format($row['total'], 0, ',', '.'),
+            htmlspecialchars($row['notes'] ?? '-')
+        );
+        $claimCount++;
+    }
+    if ($claimCount === 0) {
+        $lines[] = "  (tidak ada klaim biaya)";
+    } else {
+        $lines[] = "  Total klaim biaya: " . $claimCount;
+    }
+
+    // ============================================================
+    // 14. EXPENSE CLAIM LINES (semua)
+    // ============================================================
+    $lines[] = "\nBARIS KLAIM BIAYA (semua):";
+    $stmt = $pdo->prepare("
+      SELECT ecl.id, ecl.expense_claim_id, ecl.account_id, ecl.description, ecl.amount
+      FROM expense_claim_lines ecl
+      WHERE ecl.expense_claim_id IN (SELECT id FROM expense_claims WHERE business_id = ?)
+    ");
+    $stmt->execute([$businessId]);
+    $eclCount = 0;
+    while ($row = $stmt->fetch()) {
+        $lines[] = sprintf(
+            "  - id:%d | klaim:%d | akun:%s | %s | jumlah: %s",
+            (int)$row['id'],
+            (int)$row['expense_claim_id'],
+            htmlspecialchars($row['account_id'] ?? '-'),
+            htmlspecialchars($row['description'] ?? '-'),
+            number_format($row['amount'], 0, ',', '.')
+        );
+        $eclCount++;
+    }
+    if ($eclCount === 0) {
+        $lines[] = "  (tidak ada baris klaim biaya)";
+    } else {
+        $lines[] = "  Total baris klaim biaya: " . $eclCount;
     }
 
     return implode("\n", $lines);

@@ -291,3 +291,4 @@ ob_start();
         </div>
         <div class="page-actions" id="pageActions"></div>
       </header>
+<?php ob_end_flush(); ?>
