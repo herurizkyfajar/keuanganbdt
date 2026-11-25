@@ -91,6 +91,18 @@ document.addEventListener('DOMContentLoaded', function () {
           <button id="aiSend" title="Kirim"><i class="bi bi-send"></i></button>
         </div>
       </div>
+
+      <!-- Dialog pilihan saat sesi terakhir > 24 jam -->
+      <div id="aiSessionDialog" class="ai-session-dialog">
+        <div class="ai-session-dialog-card">
+          <div class="ai-session-dialog-title">Lanjutkan percakapan?</div>
+          <div class="ai-session-dialog-text">Percakapan terakhir Anda lebih dari 24 jam yang lalu. Pilih lanjutkan percakapan lama atau mulai percakapan baru.</div>
+          <div class="ai-session-dialog-actions">
+            <button id="aiSessionNew" class="btn btn-outline">Mulai percakapan baru</button>
+            <button id="aiSessionContinue" class="btn btn-primary">Lanjutkan percakapan lama</button>
+          </div>
+        </div>
+      </div>
     `;
     document.body.appendChild(overlay);
 
@@ -117,34 +129,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let unread = 0;
     let lastDateKey = null;
+    let currentSessionId = null;
+
+    const sessionDialog = document.getElementById('aiSessionDialog');
+    const btnSessionNew = document.getElementById('aiSessionNew');
+    const btnSessionContinue = document.getElementById('aiSessionContinue');
 
     function openChat() { overlay.classList.add('show'); panel.focus(); }
     function closeChat() { overlay.classList.remove('show'); unread = 0; unreadBadge.style.display = 'none'; }
 
-    fab.addEventListener('click', openChat);
+    fab.addEventListener('click', function () {
+      openChat();
+      loadHistory();
+    });
     closeBtn.addEventListener('click', closeChat);
     overlay.addEventListener('click', function (e) {
       if (e.target === overlay) closeChat();
     });
 
+    btnSessionNew.addEventListener('click', startNewSession);
+    btnSessionContinue.addEventListener('click', function () {
+      const sid = btnSessionContinue.dataset.sessionId || '';
+      if (sid) continueSession(sid);
+    });
+
     function scrollBottom() { body.scrollTop = body.scrollHeight; }
 
-    function addDateSeparator() {
-      const now = new Date();
-      const key = now.toDateString();
+    function addDateSeparatorFor(date) {
+      const key = date.toDateString();
       if (key === lastDateKey) return;
       lastDateKey = key;
       const div = document.createElement('div');
       div.className = 'ai-date-separator';
-      div.innerHTML = '<span>Hari ini</span>';
+      const isToday = key === new Date().toDateString();
+      const label = isToday ? 'Hari ini' : date.toLocaleDateString('id-ID', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      div.innerHTML = '<span>' + label + '</span>';
       body.appendChild(div);
       scrollBottom();
     }
 
-    function addMessage(text, role, showBadge) {
-      const now = new Date();
+    function addMessage(text, role, showBadge, createdAt) {
+      const now = createdAt ? new Date(createdAt) : new Date();
       const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      addDateSeparator();
+      addDateSeparatorFor(now);
       const div = document.createElement('div');
       div.className = 'ai-msg ai-' + role;
       const isAI = role === 'ai';
@@ -157,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="ai-meta">${isAI ? 'AI' : 'Anda'} • ${time}</div>
       `;
       if (!isAI) {
-        // user message: move meta to right, bubble already row-reverse
         div.querySelector('.ai-meta').style.marginLeft = 'auto';
         div.querySelector('.ai-meta').style.textAlign = 'right';
       }
@@ -189,6 +217,74 @@ document.addEventListener('DOMContentLoaded', function () {
       sendBtn.disabled = loading;
     }
 
+    // Muat riwayat percakapan dari server saat chat dibuka
+    async function loadHistory() {
+      try {
+        const res = await fetch('api/ai-chat-history.php');
+        const data = await res.json();
+        currentSessionId = data.current_session_id || null;
+
+        // Bersihkan pesan dan pemisah tanggal yang ada
+        body.querySelectorAll('.ai-msg, .ai-date-separator').forEach(el => el.remove());
+        lastDateKey = null;
+
+        if (data.messages && data.messages.length > 0) {
+          empty.style.display = 'none';
+          data.messages.forEach(msg => {
+            addMessage(msg.content, msg.role === 'assistant' ? 'ai' : 'user', false, msg.created_at);
+          });
+        } else {
+          empty.style.display = 'block';
+        }
+
+        // Jika sesi terakhir sudah lewat 24 jam dan belum ada sesi aktif, tampilkan pilihan
+        if (data.status === 'expired' && !currentSessionId) {
+          showSessionDialog(data.expired_session);
+        }
+      } catch (err) {
+        console.error('Gagal memuat riwayat chat:', err);
+        empty.style.display = 'block';
+      }
+    }
+
+    function showSessionDialog(expiredSession) {
+      sessionDialog.style.display = 'flex';
+      btnSessionContinue.dataset.sessionId = (expiredSession && expiredSession.session_id) || '';
+    }
+
+    function hideSessionDialog() {
+      sessionDialog.style.display = 'none';
+    }
+
+    async function startNewSession() {
+      hideSessionDialog();
+      currentSessionId = null;
+      body.querySelectorAll('.ai-msg, .ai-date-separator').forEach(el => el.remove());
+      lastDateKey = null;
+      empty.style.display = 'block';
+    }
+
+    async function continueSession(sessionId) {
+      hideSessionDialog();
+      currentSessionId = sessionId;
+      try {
+        const res = await fetch('api/ai-chat-history.php?session_id=' + encodeURIComponent(sessionId));
+        const data = await res.json();
+        body.querySelectorAll('.ai-msg, .ai-date-separator').forEach(el => el.remove());
+        lastDateKey = null;
+        if (data.messages && data.messages.length > 0) {
+          empty.style.display = 'none';
+          data.messages.forEach(msg => {
+            addMessage(msg.content, msg.role === 'assistant' ? 'ai' : 'user', false, msg.created_at);
+          });
+        } else {
+          empty.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Gagal melanjutkan sesi:', err);
+      }
+    }
+
     async function sendMessage() {
       const text = input.value.trim();
       if (!text) return;
@@ -201,10 +297,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const res = await fetch('api/ai-chat.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
+          body: JSON.stringify({ message: text, session_id: currentSessionId || '' })
         });
         const data = await res.json();
         typing.remove();
+        currentSessionId = data.session_id || currentSessionId;
         if (data.reply) {
           addMessage(data.reply, 'ai', true);
         } else {

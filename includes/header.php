@@ -62,6 +62,23 @@ try {
     // Tabel akan dibuat melalui database.sql jika gagal; tidak mengganggu aplikasi
 }
 
+// Tambahkan kolom user_id & session_id untuk riwayat per user & per sesi (24 jam)
+try {
+    $pdo->exec("ALTER TABLE ai_chat_messages ADD COLUMN user_id INT UNSIGNED NULL AFTER business_id");
+} catch (PDOException $e) {
+    // kolom sudah ada
+}
+try {
+    $pdo->exec("ALTER TABLE ai_chat_messages ADD COLUMN session_id VARCHAR(64) NULL AFTER user_id");
+} catch (PDOException $e) {
+    // kolom sudah ada
+}
+try {
+    $pdo->exec("CREATE INDEX idx_ai_chat_user_session ON ai_chat_messages (business_id, user_id, session_id, created_at)");
+} catch (PDOException $e) {
+    // indeks sudah ada
+}
+
 $userName = $_SESSION['user_name'] ?? 'Pengguna';
 $userRole = $_SESSION['user_role'] ?? 'user';
 $isLoginPage = ($currentFile === 'login.php');

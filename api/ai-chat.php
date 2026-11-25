@@ -11,6 +11,7 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+$userId = (int)($_SESSION['user_id'] ?? 0);
 $businessId = (int)($_SESSION['business_id'] ?? 0);
 if (!$businessId) {
     http_response_code(400);
@@ -20,15 +21,44 @@ if (!$businessId) {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $userMessage = trim($input['message'] ?? '');
+$inputSessionId = trim($input['session_id'] ?? '');
 if ($userMessage === '') {
     http_response_code(400);
     echo json_encode(['error' => 'Pesan kosong']);
     exit;
 }
 
+// ---- Tentukan / buat sesi percakapan (berlaku 24 jam) ----
+$sessionId = null;
+if ($inputSessionId !== '') {
+    // Gunakan sesi yang diminta jika milik user & bisnis ini
+    $stmt = $pdo->prepare("SELECT 1 FROM ai_chat_messages WHERE business_id=? AND user_id=? AND session_id=? LIMIT 1");
+    $stmt->execute([$businessId, $userId, $inputSessionId]);
+    if ($stmt->fetch()) {
+        $sessionId = $inputSessionId;
+    }
+}
+if (!$sessionId) {
+    // Cari sesi aktif (aktivitas dalam 24 jam terakhir)
+    $stmt = $pdo->prepare("
+        SELECT session_id FROM ai_chat_messages
+        WHERE business_id=? AND user_id=? AND session_id IS NOT NULL
+          AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ORDER BY created_at DESC LIMIT 1
+    ");
+    $stmt->execute([$businessId, $userId]);
+    $row = $stmt->fetch();
+    if ($row) {
+        $sessionId = $row['session_id'];
+    }
+}
+if (!$sessionId) {
+    $sessionId = bin2hex(random_bytes(16)); // sesi baru
+}
+
 // Simpan pesan pengguna
-$stmt = $pdo->prepare("INSERT INTO ai_chat_messages (business_id, role, content) VALUES (?, 'user', ?)");
-$stmt->execute([$businessId, $userMessage]);
+$stmt = $pdo->prepare("INSERT INTO ai_chat_messages (business_id, user_id, session_id, role, content) VALUES (?, ?, ?, 'user', ?)");
+$stmt->execute([$businessId, $userId, $sessionId, $userMessage]);
 
 // Ambil pengaturan AI
 $stmt = $pdo->prepare("SELECT * FROM business_ai_settings WHERE business_id = ?");
@@ -60,10 +90,10 @@ if ($enabled && $apiKey) {
 }
 
 // Simpan balasan asisten
-$stmt = $pdo->prepare("INSERT INTO ai_chat_messages (business_id, role, content) VALUES (?, 'assistant', ?)");
-$stmt->execute([$businessId, $reply]);
+$stmt = $pdo->prepare("INSERT INTO ai_chat_messages (business_id, user_id, session_id, role, content) VALUES (?, ?, ?, 'assistant', ?)");
+$stmt->execute([$businessId, $userId, $sessionId, $reply]);
 
-echo json_encode(['reply' => $reply]);
+echo json_encode(['reply' => $reply, 'session_id' => $sessionId]);
 exit;
 
 /**

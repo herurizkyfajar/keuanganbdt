@@ -693,6 +693,7 @@ table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; 
 
 /* Panel */
 .ai-chat-panel {
+  position: relative;
   background: #ffffff; border-radius: 1.5rem; width: 100%; max-width: 400px;
   height: 70vh; max-height: 720px; display: flex; flex-direction: column;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;
@@ -901,6 +902,29 @@ table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; 
 .ai-chat-header .ai-chat-title { color: #fff; }
 .ai-chat-status.ok { background: #d1e7dd; color: #0f5132; }
 .ai-chat-status.off { background: #f8d7da; color: #842029; }
+
+/* Dialog lanjutkan / mulai baru sesi */
+.ai-session-dialog {
+  position: absolute; inset: 0; background: rgba(255,255,255,0.95);
+  display: none; align-items: center; justify-content: center;
+  z-index: 15; flex-direction: column; pointer-events: auto;
+}
+.ai-session-dialog-card {
+  background: #fff; border-radius: 1rem; padding: 1.5rem 1.25rem;
+  max-width: 90%; width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  text-align: center; display: flex; flex-direction: column; gap: 1rem;
+  animation: aiFadeIn 0.3s ease;
+}
+.ai-session-dialog-title {
+  font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0;
+}
+.ai-session-dialog-text {
+  font-size: 0.86rem; color: #64748b; margin: 0; line-height: 1.5;
+}
+.ai-session-dialog-actions {
+  display: flex; gap: 0.75rem; margin-top: auto;
+}
+.ai-session-dialog-actions .btn { flex: 1; padding: 0.6rem 0.75rem; font-size: 0.85rem; }
 
   /* ---------- Dashboard mobile ---------- */
   .dash-grid { grid-template-columns: 1fr; gap: 0.85rem; }
