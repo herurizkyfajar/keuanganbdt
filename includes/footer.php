@@ -182,13 +182,11 @@ document.addEventListener('DOMContentLoaded', function () {
         : '';
       div.innerHTML = `
         ${avatar}
-        <div class="ai-bubble">${text}</div>
-        <div class="ai-meta">${isAI ? 'AI' : 'Anda'} • ${time}</div>
+        <div class="ai-content">
+          <div class="ai-bubble">${text}</div>
+          <div class="ai-meta">${isAI ? 'AI' : 'Anda'} • ${time}</div>
+        </div>
       `;
-      if (!isAI) {
-        div.querySelector('.ai-meta').style.marginLeft = 'auto';
-        div.querySelector('.ai-meta').style.textAlign = 'right';
-      }
       body.appendChild(div);
       if (empty) empty.style.display = 'none';
       scrollBottom();
