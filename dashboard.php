@@ -178,6 +178,8 @@ document.getElementById('pageActions').innerHTML = `
 .grp-blue { background: #e8f1fe; color: #2563eb; }
 .grp-green { background: #e7f8ea; color: #16a34a; }
 
+.stat-icon.bg-danger { color: #fff; }
+
 /* Baris akun */
 .dash-rows { padding: 0.15rem 0.35rem 0.6rem; }
 .dash-row {
@@ -220,7 +222,7 @@ document.getElementById('pageActions').innerHTML = `
     </div>
   </div>
   <div class="stat-card">
-    <span class="stat-icon bg-danger"><i class="bi bi-scales"></i></span>
+    <span class="stat-icon bg-danger"><i class="bi bi-wallet2"></i></span>
     <div class="stat-main">
       <div class="stat-label">Total Liabilitas</div>
       <div class="stat-value"><?= rp($liabilityTotal) ?></div>
