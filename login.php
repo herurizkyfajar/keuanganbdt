@@ -539,11 +539,228 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn-masuk { padding: 0.85rem 1rem; font-size: 0.95rem; }
     .hero-features { flex-direction: column; }
   }
+
+  /* ================= App Launcher (tombol aplikasi) ================= */
+  .app-launcher-wrap {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    z-index: 6;
+  }
+  .app-launcher-btn {
+    position: relative;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: rgba(20, 30, 48, 0.62);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+  }
+  .app-launcher-btn:hover {
+    background: rgba(20, 30, 48, 0.78);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    transform: translateY(-1px);
+  }
+  .app-launcher-btn:active {
+    transform: scale(0.96);
+  }
+  .app-launcher-dots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.22rem;
+    width: 62%;
+    height: 62%;
+  }
+  .app-launcher-dot {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  /* Popup backdrop & panel - Menu Favorit */
+  .app-launcher-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 100;
+    display: none;
+    padding: 1rem;
+  }
+  .app-launcher-popup {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 320px;
+    max-width: calc(100vw - 2.4rem);
+    max-height: 90vh;
+    background: #ffffff;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    z-index: 105;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    color: #111827;
+    animation: popupIn 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    opacity: 0;
+  }
+  .app-launcher-popup.open {
+    display: flex;
+    transform: none;
+    opacity: 1;
+  }
+  @keyframes popupIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* Header biru gradien */
+  .app-launcher-header {
+    background: linear-gradient(135deg, #0b4f9e 0%, #1565c0 60%, #1976d2 100%);
+    padding: 1rem 1.25rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-launcher-header::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+  }
+  .app-launcher-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .app-launcher-brand .brand-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    background: #ffffff;
+    border-radius: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .app-launcher-brand .brand-icon i {
+    color: #0b4f9e;
+    font-size: 1.35rem;
+  }
+  .app-launcher-brand-info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .app-category-section {
+    margin-bottom: 1.4rem;
+  }
+  .app-category-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .app-category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem 0.7rem;
+  }
+
+  /* Grid 3 kolom (container section) */
+  .app-launcher-grid {
+    display: block;
+    padding: 0.9rem 1rem 1rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .app-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    text-align: center;
+    text-decoration: none;
+    color: #374151;
+    padding: 0.65rem 0.3rem;
+    border-radius: 1rem;
+    transition: background 0.15s, transform 0.1s;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .app-item:hover { background: #f3f4f6; }
+  .app-item:active { transform: scale(0.96); }
+  .app-item .app-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .app-item .app-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+    color: #111827;
+  }
+
+  /* Dekorasi lingkaran di pojok kanan bawah popup - DIHAPUS */
+
+  @media (max-width: 640px) {
+    .app-launcher-wrap { top: 1rem; right: 1rem; }
+    .app-launcher-popup { top: 0.8rem; right: 0.8rem; left: 0.8rem; width: auto; max-height: 92vh; }
+    .app-launcher-grid { padding: 0.7rem 0.7rem 0.9rem; }
+  }
 </style>
 </head>
 <body>
 
 <div class="login-layout">
+
+  <!-- Tombol launcher aplikasi di kanan atas layar -->
+  <div class="app-launcher-wrap">
+    <button type="button" class="app-launcher-btn" id="appLauncherBtn" title="Aplikasi" aria-label="Buka aplikasi" aria-expanded="false" aria-controls="appLauncherPopup">
+      <span class="app-launcher-dots" aria-hidden="true">
+        <span class="app-launcher-dot"></span><span class="app-launcher-dot"></span><span class="app-launcher-dot"></span>
+        <span class="app-launcher-dot"></span><span class="app-launcher-dot"></span><span class="app-launcher-dot"></span>
+        <span class="app-launcher-dot"></span><span class="app-launcher-dot"></span><span class="app-launcher-dot"></span>
+      </span>
+    </button>
+  </div>
 
   <!-- Left: Hero panel -->
   <div class="login-hero">
@@ -764,6 +981,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </div>
 
+<!-- Popup: Menu Favorit -->
+<div class="app-launcher-backdrop" id="appLauncherBackdrop" aria-hidden="true"></div>
+<div class="app-launcher-popup" id="appLauncherPopup" role="dialog" aria-modal="true" aria-label="Menu Favorit">
+  <div class="app-launcher-header">
+    <div class="app-launcher-brand-info">
+      <h3>Ekosistem Bandung Driver Tour</h3>
+    </div>
+  </div>
+  <div class="app-launcher-grid" id="appLauncherGrid">
+    <!-- Diisi oleh JavaScript -->
+  </div>
+</div>
+
 <script>
 document.getElementById('togglePassword').addEventListener('click', function () {
   const passwordInput = document.getElementById('password');
@@ -773,6 +1003,73 @@ document.getElementById('togglePassword').addEventListener('click', function () 
   icon.classList.toggle('bi-eye');
   icon.classList.toggle('bi-eye-slash');
 });
+
+/* ================= App Launcher Popup ================= */
+(function () {
+  const btn = document.getElementById('appLauncherBtn');
+  const popup = document.getElementById('appLauncherPopup');
+  const backdrop = document.getElementById('appLauncherBackdrop');
+  const grid = document.getElementById('appLauncherGrid');
+
+  // Daftar aplikasi yang dimiliki (modul yang tersedia di sistem)
+  const apps = [
+    { name: 'Booking', href: 'https://booking.bandungdrivertour.com/login', icon: 'bi-calendar-check', color: '#2563eb', category: 'Aplikasi' },
+    { name: 'Keuangan', href: 'https://keu.bandungdrivertour.com/', icon: 'bi-wallet2', color: '#15803d', category: 'Aplikasi' },
+    { name: 'BDT', href: 'http://bandungdrivertour.com/', icon: 'bi-globe', color: '#7c3aed', category: 'Website' },
+    { name: 'BRC', href: 'https://www.bandungrentcar.com/', icon: 'bi-globe', color: '#f59e0b', category: 'Website' },
+    { name: 'DB', href: 'http://driversbandung.com/', icon: 'bi-globe', color: '#06b6d4', category: 'Website' },
+  ];
+
+  function renderApps() {
+    const categories = [...new Set(apps.map(a => a.category))];
+    grid.innerHTML = categories.map(function (cat) {
+      const catApps = apps.filter(function (a) { return a.category === cat; });
+      return `
+        <div class="app-category-section">
+          <div class="app-category-label">${cat}</div>
+          <div class="app-category-grid">
+            ${catApps.map(function (app) {
+              return `
+                <a href="${app.href}" class="app-item" aria-label="${app.name}">
+                  <span class="app-icon" style="background:${app.color}; color:#ffffff;">
+                    <i class="bi ${app.icon}"></i>
+                  </span>
+                  <span class="app-label">${app.name}</span>
+                </a>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openPopup() {
+    popup.classList.add('open');
+    backdrop.style.display = 'flex';
+    backdrop.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePopup() {
+    popup.classList.remove('open');
+    backdrop.style.display = 'none';
+    backdrop.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  if (btn && popup && backdrop) {
+    btn.addEventListener('click', openPopup);
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) closePopup();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && popup.classList.contains('open')) closePopup();
+    });
+  }
+
+  renderApps();
+})();
 </script>
 
 </body>
