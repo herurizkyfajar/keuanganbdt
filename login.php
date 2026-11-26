@@ -540,6 +540,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .hero-features { flex-direction: column; }
   }
 
+  /* ---------- Login page footer (menempel di bawah, di atas gambar) ---------- */
+  .login-layout .app-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0.9rem 1.5rem;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(13,43,82,0.10);
+    font-size: 0.82rem;
+    color: var(--bd-navy);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+  }
+  .login-layout .app-footer .footer-container {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+  }
+  .login-layout .app-footer .footer-copyright {
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .login-layout .app-footer .footer-credit {
+    font-size: 0.8rem;
+    color: var(--bd-navy);
+    opacity: 0.9;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    margin-left: auto;
+  }
+  .login-layout .app-footer .footer-credit a {
+    color: var(--bd-blue);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+  .login-layout .app-footer .footer-credit a:hover {
+    color: var(--bd-blue-mid);
+  }
+  /* jaga konten tidak tertutup oleh footer absolute */
+  .login-layout > .login-hero { padding-bottom: 3.2rem; }
+  .login-layout > .login-card-panel { padding-bottom: 3.2rem; }
+
   /* ================= App Launcher (tombol aplikasi) ================= */
   .app-launcher-wrap {
     position: absolute;
@@ -979,6 +1038,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-copyright">© 2026 Bandung Driver Tour. All Rights Reserved.</div>
+      <div class="footer-credit">Website by <a href="http://websiterakyat.id/" target="_blank" rel="noopener noreferrer">Website Rakyat</a>.</div>
+    </div>
+  </footer>
 </div>
 
 <!-- Popup: Menu Favorit -->

@@ -143,6 +143,7 @@ a:hover { color: var(--primary-hover); }
   padding: 1.5rem 2rem;
   max-width: none;
   width: 100%;
+  padding-bottom: 4rem; /* ruang untuk footer fixed di bawah */
 }
 
 /* ---------- Page Header ---------- */
@@ -982,3 +983,67 @@ table.mdlg-table { width: 100%; border-collapse: collapse; table-layout: fixed; 
 .table-responsive table { min-width: 600px; }
 #txLines { min-width: 700px; }
 #txLines td input, #txLines td select { width: 100%; box-sizing: border-box; }
+
+/* ---------- Footer halaman ---------- */
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 250px;
+  right: 0;
+  border-top: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 1rem 2rem;
+  box-shadow: 0 -1px 3px rgba(15,23,42,0.04);
+  z-index: 50;
+}
+@media (max-width: 991px) {
+  .app-footer { left: 0; }
+}
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+.footer-copyright {
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+.footer-credit a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  white-space: nowrap;
+}
+.footer-credit a:hover {
+  color: var(--primary-hover);
+  text-decoration-color: var(--primary-hover);
+}
+/* kecilkan teks kredit agar tidak bersaing dengan copyright */
+.footer-credit {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .app-footer { padding: 1rem 1.25rem; }
+  .footer-container { flex-direction: row; align-items: center; gap: 0.5rem; flex-wrap: nowrap; min-width: 0; }
+  .footer-copyright, .footer-credit { font-size: 0.78rem; white-space: nowrap; min-width: 0; overflow: hidden; }
+  .footer-credit { margin-left: auto; }
+}

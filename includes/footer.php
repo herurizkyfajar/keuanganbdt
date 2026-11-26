@@ -18,6 +18,13 @@ $aiStatusText = $aiEnabled ? 'AKTIF' : 'OFF';
   </main>
 </div>
 
+<footer class="app-footer">
+  <div class="footer-container">
+    <div class="footer-copyright">© 2026 Bandung Driver Tour. All Rights Reserved.</div>
+    <div class="footer-credit">Website by <a href="http://websiterakyat.id/" target="_blank" rel="noopener noreferrer">Website Rakyat</a>.</div>
+  </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
